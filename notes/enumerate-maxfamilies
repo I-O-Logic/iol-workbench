@@ -1,0 +1,108 @@
+## algorithmus
+
+MM={M} // Set of subsets of M; initially only M itself
+P      // some predicate on sets
+O={}   // the output; set of sets, initially empty
+
+// invariant: every element in MM has equal cardinality
+while MM not empty do
+  n     := |MM[0]|
+  MMP   := {M' in MM | P(M') }
+  O     := O u MMP
+  MMNP  := MM \ MMP
+  
+  MM := {m | m is (n-1)-subset of some element in MMNP and m not subset of any set in O}
+od
+return O
+
+
+### ansatz:
+
+gegeben ist eine endliche menge M = {1,...,n} und ein prädikat P
+gesucht: die menge O aller subset-maximalen teilmengen M' von M sodass die M' P erfüllen.
+
+trivialer ansatz ist:
+- Wenn M passt (also P erfüllt), fertig. Ergebnis: O = {M}
+- Wenn M nicht P erfüllt, berechne alle n-1-elementigen M'1, ..., M'n Teilmengen von M
+  (davon gibt's n Stück)
+  - Prüfe für jede dieser Teilmengen ob P erfüllt ist
+  - Jede M'i die P erfüllt kommt in O
+  - Jede M'i die P nicht erfüllt, kommt in eine neue "Todo"-Menge T
+  - Bereche alle (n-2)-elementigen Teilmengen aller Mengen in T die nicht schon Teilmengen einer Menge in O sind:
+    M''1, ..., M''j
+    - Jede M''i die P erfüllt kommt in O
+    - Jede M''i die P nicht erfüllt, kommt in eine neue todo Menge T'
+    - Bereche alle (n-3)-elementige Teilmengen aller Mengen in T' die nicht schon Teilmengen einer Menge in O sind:
+      M'''1, ..., M'''k
+      - usw.
+- Sobald eine todo-menge T (T', T'', ...) leer ist, fertig.
+- Ausgabe: O
+
+
+### experimente
+
+[1,2,3,4,5]
+
+[2,3,4,5] [1,3,4,5] [1,2,4,5] [1,2,3,5] [1,2,3,4]
+
+####################################################
+---filter all that for which P holds ---
+(e.g. 1st and 2nd one)
+[2,3,4,5] [1,3,4,5] 
+
+---remaining ones----
+[1,2,4,5] [1,2,3,5] [1,2,3,4]
+
+--- calculate 3-subsets
+
+[2,4,5] [1,4,5] [1,2,5] [1,2,4]
+[2,3,5] [1,3,5] [1,2,5] [1,2,3]
+[2,3,4] [1,3,4] [1,2,4] [1,2,3]
+
+--- interreduce ---
+
+[2,4,5] [1,4,5] [1,2,5] [1,2,4]
+[2,3,5] [1,3,5]         [1,2,3]
+[2,3,4] [1,3,4] 
+
+
+--- remove those which are subsets for 1st and 2nd ---
+
+                [1,2,5] [1,2,4]
+                        [1,2,3]
+
+
+--- test them recursively ---
+
+
+
+note: results sets are [1,2,X] (x in 3,4,5) and [1,2] is wholeset minus 1st union wholeset minus 2nd
+
+####################################################
+---filter all that for which P holds ---
+(e.g. 2nd and 5th one)
+[1,3,4,5] [1,2,3,4]
+
+---remaining ones----
+[2,3,4,5] [1,2,4,5] [1,2,3,5]
+
+--- calculate 3-subsets
+
+[3,4,5] [2,4,5] [2,3,5] [2,3,4]
+[2,4,5] [1,4,5] [1,2,5] [1,2,4]
+[2,3,5] [1,3,5] [1,2,5] [1,2,3]
+
+--- interreduce ---
+
+[3,4,5] [2,4,5] [2,3,5] [2,3,4]
+        [1,4,5] [1,2,5] [1,2,4]
+        [1,3,5]         [1,2,3]
+        
+--- remove those which are subsets already ---
+
+        [2,4,5] [2,3,5]
+                [1,2,5]
+                
+--- test them recursively ---
+
+note: results sets are [2,5,X] (x in 1,3,4) and [2,5] is wholeset minus 2nd union wholeset minus 5th

@@ -1,0 +1,192 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="none" name="referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Cache-control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <title>I/O Logic Workbench</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="lib/jquery-3.4.1.slim.min.js" ></script>
+    <script src="lib/lodash.js"></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+          <h1>I/O Logics workbench</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4 p-3" style="border-left: 0px solid black;border-top: 0px solid black;border-bottom: 0px solid black;background-color:#f5f5f5;border-radius:1em 0em 0em 1em">
+          <h3 class="mt-0">Examples</h3>
+          <div class="text-secondary" style="font-size:x-small">(Click on button to load)</div>
+          <div class="d-flex justify-content-center mt-2">
+            <button type="button" id="example1button" class="btn btn-sm btn-secondary mr-1">
+              <div>Example 1</div>
+              <div class="small">(simple test)</div>
+            </button>
+            <button type="button" id="example2button" class="btn btn-sm btn-secondary mr-1">
+              <div>Example 2</div>
+              <div class="small">(reasoning by cases)</div>
+            </button>
+            <button type="button" id="example3button" class="btn btn-sm btn-secondary">
+            <div>Example 3</div>
+              <div class="small">(reusable scenario)</div>
+            </button>
+          </div>
+          <h3 class="mt-3">Out operations</h3>
+          <div class="form-check">
+            <input class="form-check-input cursor-pointer" type="radio" name="out" id="out1r" value="out1" checked>
+            <label class="form-check-label cursor-pointer" for="out1r">
+              out<sub>1</sub> (Simple-minded)
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input cursor-pointer" type="radio" name="out" id="out2r" value="out2">
+            <label class="form-check-label cursor-pointer" for="out2r">
+              out<sub>2</sub> (Basic)
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input cursor-pointer" type="radio" name="out" id="out3r" value="out3">
+            <label class="form-check-label cursor-pointer" for="out3r">
+              out<sub>3</sub> (Reusable)
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input cursor-pointer" type="radio" name="out" id="out4r" value="out4">
+            <label class="form-check-label cursor-pointer" for="out4r">
+              out<sub>4</sub> (Basic Reusable)
+            </label>
+          </div>
+          <h3 class="mt-3">Parameters</h3>
+          <div class="form-check">
+            <input class="form-check-input cursor-pointer" type="checkbox" name="io-throughput" id="checkbox-io-throughput" value="" disabled>
+            <label class="form-check-label cursor-pointer" for="checkbox-io-throughput">
+              With throughput
+            </label>
+          </div>
+          <div class="form-check mt-2">
+            <input class="form-check-input cursor-pointer" type="checkbox" name="io-constrained" id="checkbox-constrained" value="">
+            <label class="form-check-label cursor-pointer" for="checkbox-constrained">
+              Constrained
+            </label>
+          </div>
+          <div class="ml-4">
+            <div class="form-check">
+              <input class="form-check-input cursor-pointer" type="radio" name="io-constrained-net" id="radio-net-credulous" value="net-credulous" checked>
+              <label class="form-check-label cursor-pointer" for="radio-net-credulous">
+                Credulous net output
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input cursor-pointer" type="radio" name="io-constrained-net" id="radio-net-skeptical" value="net-skeptical">
+              <label class="form-check-label cursor-pointer" for="radio-net-skeptical">
+                Skeptical net output
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input cursor-pointer" type="checkbox" name="io-preference" id="checkbox-preference" value="" disabled>
+              <label class="form-check-label cursor-pointer" for="checkbox-preference">
+                With preference
+              </label>
+            </div>
+            <div class="ml-4">
+              <div class="form-check">
+                <input class="form-check-input cursor-pointer" type="radio" name="io-preference-lifting" id="radio-preference-lifting-brass" value="lifting-brass" checked disabled>
+                <label class="form-check-label cursor-pointer" for="radio-preference-lifting-brass">
+                  Brass lifting
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input cursor-pointer" type="radio" name="io-preference-lifting" id="radio-preference-lifting-fafa" value="lifting-fafa" disabled>
+                <label class="form-check-label cursor-pointer" for="radio-preference-lifting-fafa">
+                  &#8704;&#8704; lifting
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-8  p-3" style="border-left: 1px solid black;background-color:#f5f5f5;border-radius:0em 1em 0em 0em">
+          <h3>Normative scenario editor</h3>
+          <hr class="mt-0">
+          <div class="input-group">
+            <label for="input">Situation (input)</label>
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">A</div>
+              </div>
+              <input type="text" class="form-control text-monospace" id="input" placeholder="Comma seperated list of formulas ...">
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="norms">Norms</label>
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">N</div>
+              </div>
+              <textarea class="form-control text-monospace" id="norms" rows="3" placeholder="Newline separated list of norms (a,x)"></textarea>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="constraints">Constraints</label>
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">C</div>
+              </div>
+              <input type="text" class="form-control text-monospace" id="constraints" placeholder="Comma seperated list of formulas ...">
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="output">Output <span class="text-muted small">(required)</span></label>
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">X</div>
+              </div>
+              <input type="text" class="form-control text-monospace" id="output" placeholder="A formula">
+            </div>
+          </div>
+          <button id="checkButton" type="button" class="btn btn-primary btn-block mt-2 mb-2">Check output</button>
+          <button id="outputButton" type="button" class="btn btn-primary btn-block mt-2 mb-2">Generate output</button>
+          <div class="alert alert-success fade show" role="alert" id="feedbackyes" style="display:none">
+            Yes, x is in the output set.
+          </div>
+          <div class="alert alert-warning fade show" role="alert" id="feedbackno" style="display:none">
+            No, x is not in the output set.
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm">
+          <p style="font-size:x-small">
+            Formulas are constructed via
+            <span class="text-monospace">&</span> (conjunction),
+            <span class="text-monospace">|</span> (disjunction),
+            <span class="text-monospace">~</span> (negation) and parentheses. There are
+            no binding preferences between conjunction and disjunction, so they have to be
+            properly parenthesised. Atomic propositions
+            are any sequence of letters, e.g. <span class="text-monospace">a</span>,
+            <span class="text-monospace">abc</span> or 
+            <span class="text-monospace">veryLongNameForMyAtomicProposition</span>.
+            The literals <span class="text-monospace">T</span> and 
+            <span class="text-monospace">F</span> are interpreted as truth and falsehood,
+            respectively.
+            An example formula is <span class="text-monospace">x & (c | d) & ~e</span> 
+          </p>
+        </div>
+      </div>
+    </div>
+    <footer class="footer text-muted small d-flex justify-content-center" style="background-color: #eeeeee">
+        (c) 2020 by Alexander Steen
+    </footer>
+  </body>
+  <script src="lib/SAT.js"></script>
+  <script src="js/proplogicparser.js"></script>
+  <script src="js/pltk.js"></script>
+  <script src="js/inputoutput.js"></script>
+</html>
