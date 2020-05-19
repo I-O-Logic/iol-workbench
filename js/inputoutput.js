@@ -6,9 +6,7 @@ iol = new function() { const lib = this;
   }
   
   lib.out1set = function(A,N) {
-    //console.log("out1setN", N)
     let N2 = N.filter(n => pltk.consequence(A, n[0]))
-    //console.log("out1setN2")
     let M = N2.map(n => n[1])
     return canonizeOut(M)
   }
@@ -80,9 +78,9 @@ iol = new function() { const lib = this;
       NNNotC = _.without(NN,NNC)
       console.log("NNNotC", NNNotC)
       
-      NN = _.uniqWith(_.flatMap(NNNotC,lib.subsetsOneSmaller), _.isEqual)
+      NN = _.uniqWith(_.flatMap(NNNotC,subsetsOneSmaller), _.isEqual)
       console.log("subsets of NN", NN)
-      NN = _.filter(NN, function(n) {return !_.some(result, r => lib.subset(n,r))})
+      NN = _.filter(NN, function(n) {return !_.some(result, r => subset(n,r))})
       console.log("NN", NN)
     }
     return result
@@ -98,11 +96,11 @@ iol = new function() { const lib = this;
   
   
   
-  lib.subset = function(a,b) {
+  let subset = function(a,b) {
     return _.difference(a, b).length === 0
   }
   
-  lib.subsetsOneSmaller = function(S) {
+  let subsetsOneSmaller = function(S) {
     let result = []
     S.forEach(s => 
       result.push(_.without(S,s))
@@ -124,92 +122,17 @@ iol = new function() { const lib = this;
   }
 }
 
+outfunction = iol.out1
+throughput = false
+constraints = false
+netOutput = null
+preference = null
+const negativeAnswer = "No, the formula x is not in the output set."
+const positiveAnswer = "Yes, the formula x is in the output set."
+
 
 $(document).ready(function() {
-  $("#output").on("keyup", function(event) {
-    $("#output").removeClass("is-invalid")
-  });
-
-  $("#outputButton").click(function(){
-    const Atext = $("#input").val()
-    const Ntext = $("#norms").val()
-    const Ctext = $('#constraints').val()
-    let Aval = []
-    if (Atext.length > 0) {
-      Aval = Atext.split(',').map(plparse.read)
-    }
-    let Nval = []
-    if (Ntext.length > 0) {
-      Nval = Ntext.trim().split('\n').filter(y => y.length > 0).map(x => x.trim().slice(1,-1).split(',').map(plparse.read))
-    }
-    let Cval = []
-    if (Ctext.length > 0) {
-      console.log("here", Ctext)
-      Cval = Ctext.split(',').map(plparse.read)
-      console.log("here", Cval)
-    }
-    let result = iol.out1set(Aval,Nval)
-    console.log("result", result, pltk.plprintset(result))
-    let resultText = pltk.plprintset(result)
-    $("#output").val("Cn(".concat(resultText,")"))
-    console.log("cval", pltk.plprintset(Cval))
-    let result2 = iol.maxFamily(iol.out1set, Nval, Aval, Cval)
-    console.log("result2", result2)
-    let result3 = iol.outFamily0(iol.out1set, result2, Aval)
-    console.log("result3", result3)
-    let result4 = _.intersectionWith(...result3, _.isEqual)
-    console.log("result4", result4, pltk.plprintset(result4))
-  });
-  
-  $("#checkButton").click(function(){
-    $('#feedbackno').hide()
-    $('#feedbackyes').hide()
-
-    const Atext = $("#input").val()
-    const Ntext = $("#norms").val()
-    const Ctext = $('#constraints').val()
-    const xtext = $("#output").val()
-    
-    let Aval = []
-    if (Atext.length > 0) {
-      Aval = Atext.split(',').map(plparse.read)
-    }
-    let Nval = []
-    if (Ntext.length > 0) {
-      Nval = Ntext.trim().split('\n').filter(y => y.length > 0).map(x => x.trim().slice(1,-1).split(',').map(plparse.read))
-    }
-    let Cval = []
-    if (Ctext.length > 0) {
-      Cval = Ctext.split(',').map(plparse.read)
-    }
-    const xval = plparse.read(xtext)
-    if (xval == null) {
-      $('#output').addClass("is-invalid")
-      return
-    }
-   
-    let out = null
-    if ($('#out1r').prop("checked")) {
-      out = iol.out1
-    } else if ($('#out2r').prop("checked")) {
-      out = iol.out2
-    } else if ($('#out3r').prop("checked")) {
-      out = iol.out3
-    } else if ($('#out4r').prop("checked")) {
-      out = iol.out4
-    }
-    let result = out(Aval,Nval,xval)
-    if (result != null) {
-      if (result) {
-        $('#feedbackyes').show()
-        window.setTimeout(function() {$('#feedbackyes').hide()}, 5000);
-      } else {
-        $('#feedbackno').show()
-        window.setTimeout(function() {$('#feedbackno').hide()}, 5000);
-      }
-    }
-  });
-  
+  // Examples
   $("#example1button").click(function(){
     $("#output").removeClass("is-invalid")
     $("#input").val('a,b')
@@ -230,5 +153,175 @@ $(document).ready(function() {
     $("#norms").val('(a,x)\n(b,y)\n(a&b,z)')
     $("#output").val('z')
   });
+
+  // Parse error handling
+  $("#input").on("keyup", function(event) {
+    $("#input").removeClass("is-invalid")
+  });
+  $("#norms").on("keyup", function(event) {
+    $("#norms").removeClass("is-invalid")
+  });
+  $("#constraints").on("keyup", function(event) {
+    $("#constraints").removeClass("is-invalid")
+  });
+  $("#output").on("keyup", function(event) {
+    $("#output").removeClass("is-invalid")
+  });
+  
+  // GUI state
+  $('#checkbox-constrained').change(function() {
+    if (this.checked) {
+      constraints = true
+      $('#radio-net-credulous').prop("disabled", false);
+      $('#radio-net-skeptical').prop("disabled", false);
+      if (netOutput == null) {
+        $('#radio-net-credulous').click()
+      }
+      $('#constraints').prop("disabled", false);
+    } else {
+      constraints = false
+      $('#radio-net-credulous').prop("disabled", true);
+      $('#radio-net-skeptical').prop("disabled", true);
+      $('#constraints').prop("disabled", true);
+    }
+  });
+  $('input[type=radio][name=io-constrained-net]').change(function() {
+    netOutput = this.value
+  });
+  $('input[type=radio][name=out]').change(function() {
+    switch (this.value) {
+      case "out1": outfunction = iol.out1; break;
+      case "out2": outfunction = iol.out2; break;
+      case "out3": outfunction = iol.out3; break;
+      case "out4": outfunction = iol.out4; break;
+      default: 
+        alert("This should not happen; tell Alex :-)")
+        // should not happen
+    }
+  });
+  
+  // iol functionality
+  $("#outputButton").click(function(){
+    const Atext = $("#input").val()
+    const Ntext = $("#norms").val()
+    const Ctext = $('#constraints').val()
+    const xtext = $("#output").val()
+    
+    let Aval = []
+    if (Atext.length > 0) {
+      Aval = Atext.split(',').map(plparse.read)
+    }
+    let Nval = []
+    if (Ntext.length > 0) {
+      Nval = Ntext.trim().split('\n').filter(y => y.length > 0).map(x => x.trim().slice(1,-1).split(',').map(plparse.read))
+    }
+    let Cval = []
+    if (Ctext.length > 0) {
+      console.log("here", Ctext)
+      Cval = Ctext.split(',').map(plparse.read)
+      console.log("here", Cval)
+    }
+    const xval = plparse.read(xtext)
+    if (xval == null) {
+      $('#output').addClass("is-invalid")
+      return
+    }
+    
+    let result = iol.out1set(Aval,Nval)
+    console.log("result", result, pltk.plprintset(result))
+    let resultText = pltk.plprintset(result)
+    $("#output").val("Cn(".concat(resultText,")"))
+    console.log("consequence:", pltk.consequence(result, xval))
+    console.log("cval", pltk.plprintset(Cval))
+    let result2 = iol.maxFamily(iol.out1set, Nval, Aval, Cval)
+    console.log("result2", result2)
+    let result3 = iol.outFamily0(iol.out1set, result2, Aval)
+    console.log("result3", result3)
+    let result4 = _.intersectionWith(...result3, _.isEqual)
+    console.log("result4", result4, pltk.plprintset(result4))
+  });
+  
+  $("#checkButton").click(function(){
+    //$('#feedbackno').hide()
+    //$('#feedbackyes').hide()
+    $('#response').removeClass("alert-success")
+    $('#response').removeClass("alert-warning")
+    $('#response').css('visibility', 'collapse');
+
+    const Atext = $("#input").val()
+    const Ntext = $("#norms").val()
+    const Ctext = $('#constraints').val()
+    const xtext = $("#output").val()
+    
+    let Aval = []
+    let Nval = []
+    let Cval = []
+    let xval = null
+    
+    if (Atext.length > 0) {
+      try {
+        Aval = Atext.split(',').map(plparse.read)
+      } catch(err) {
+        $('#input').addClass("is-invalid")
+        return
+      }
+    }
+    
+    if (Ntext.length > 0) {
+      try {
+        Nval = Ntext.trim().split('\n').filter(y => y.length > 0).map(x => x.trim().slice(1,-1).split(',').map(plparse.read))
+      } catch(err) {
+        $('#norms').addClass("is-invalid")
+        return
+      }
+    }
+    
+    if (Ctext.length > 0) {
+      try {
+        Cval = Ctext.split(',').map(plparse.read)
+      } catch(err) {
+        $('#constraints').addClass("is-invalid")
+        return
+      }
+    }
+    
+    try {
+      xval = plparse.read(xtext)
+    } catch(err) {
+        $('#output').addClass("is-invalid")
+        return
+    }
+    if (xval == null) {
+      $('#output').addClass("is-invalid")
+      return
+    }
+    
+    /*
+    let out = null
+    if ($('#radio-out1').prop("checked")) {
+      out = iol.out1
+    } else if ($('#radio-out2').prop("checked")) {
+      out = iol.out2
+    } else if ($('#radio-out3').prop("checked")) {
+      out = iol.out3
+    } else if ($('#radio-out4').prop("checked")) {
+      out = iol.out4
+    }*/
+    
+    let result = outfunction(Aval,Nval,xval)
+    if (result != null) {
+      if (result) {
+        $('#response').addClass("alert-success")
+        $('#response-text').text(positiveAnswer)
+      } else {
+        $('#response').addClass("alert-warning")
+        $('#response-text').text(negativeAnswer)
+      }
+      $('#response').css('visibility', 'visible');
+      window.setTimeout(function() {$('#response').css('visibility', 'collapse');}, 5000);
+    }
+  });
+  
+  
 });
 
