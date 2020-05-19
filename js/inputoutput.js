@@ -17,6 +17,16 @@ iol = new function() { const lib = this;
     return A2.every(y => lib.out1([y],N,x))
   }
   
+  lib.out2set = function(A,N) {
+    let dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
+    //console.log("clauses", pltk.plprintset(dnf))
+    let Ns = _.map(dnf, x => lib.out1set([x],N))
+    //console.log("Ns", Ns, _.map(Ns, pltk.plprintset))
+    let result = _.intersectionWith(...Ns, _.isEqual)
+    //console.log("result",pltk.plprintset(result))
+    return result
+  }
+  
   lib.out3 = function(A,N,x) {
     let A2 = A.slice()
     let N2 = N.filter(n => pltk.consequence(A2, n[0]))
@@ -32,6 +42,20 @@ iol = new function() { const lib = this;
       }
     }
     return true
+  }
+  
+  lib.out3set = function(A,N) {
+    let A2 = A.slice() // the incremental set of facts
+    let N2 = N.filter(n => pltk.consequence(A2, n[0])) // the set of triggered norms
+    let NN = _.without(N, ...N2) // The set of not-triggered norms
+    let New = N2 // newly triggered norms
+    while (!_.isEmpty(New)) { // terminate if no new norms can be triggered
+      A2 = A2.concat(N2.map(n => n[1])) // add facts
+      New = NN.filter(n => pltk.consequence(A2, n[0])) // potentially new triggered norms
+      N2 = N2.concat(New) //add to result set
+      NN = NN.filter(n => !New.includes(n)) // remove triggered from NN
+    }
+    return canonizeOut(N2.map(n => n[1]))
   }
   
   lib.out4 = function(A,N,x) {
@@ -205,7 +229,6 @@ $(document).ready(function() {
     const Atext = $("#input").val()
     const Ntext = $("#norms").val()
     const Ctext = $('#constraints').val()
-    const xtext = $("#output").val()
     
     let Aval = []
     if (Atext.length > 0) {
@@ -217,28 +240,21 @@ $(document).ready(function() {
     }
     let Cval = []
     if (Ctext.length > 0) {
-      console.log("here", Ctext)
       Cval = Ctext.split(',').map(plparse.read)
-      console.log("here", Cval)
-    }
-    const xval = plparse.read(xtext)
-    if (xval == null) {
-      $('#output').addClass("is-invalid")
-      return
     }
     
-    let result = iol.out1set(Aval,Nval)
+    let result = iol.out3set(Aval,Nval)
     console.log("result", result, pltk.plprintset(result))
     let resultText = pltk.plprintset(result)
     $("#output").val("Cn(".concat(resultText,")"))
-    console.log("consequence:", pltk.consequence(result, xval))
+    /*console.log("consequence:", pltk.consequence(result, xval))
     console.log("cval", pltk.plprintset(Cval))
     let result2 = iol.maxFamily(iol.out1set, Nval, Aval, Cval)
     console.log("result2", result2)
     let result3 = iol.outFamily0(iol.out1set, result2, Aval)
     console.log("result3", result3)
     let result4 = _.intersectionWith(...result3, _.isEqual)
-    console.log("result4", result4, pltk.plprintset(result4))
+    console.log("result4", result4, pltk.plprintset(result4))*/
   });
   
   $("#checkButton").click(function(){

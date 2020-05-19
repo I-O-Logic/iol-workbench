@@ -262,7 +262,8 @@ pltk = new function() { const lib = this;
   }
   
   lib.disjsetsimp = function(fs) {
-    let lits = _.map(_.uniqWith(fs, _.isEqual), lib.simp)
+    let lits0 = _.map(_.uniqWith(fs, _.isEqual), lib.simp)
+    let lits = _.sortBy(lits0, ['args'])
     let lits1 = _.filter(lits, x => !lib.isF(x))
     let redundantLit = _.some(lits1, x => _.some(_.without(lits1,x), y => _.isEqual(y, lib.mkNot(x)) ))
     let tLit = _.some(lits1, lib.isT)
