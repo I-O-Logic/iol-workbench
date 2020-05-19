@@ -419,6 +419,11 @@ pltk = new function() { const lib = this;
     return !lib.sat(f)
   }
   
+  lib.consistent = function(fs) {
+    let formula = lib.mkConjs(fs)
+    return lib.sat(formula)
+  }
+  
   lib.consequence = function(assumptions,f) {
     let formulas = assumptions.slice()
     formulas.push(lib.mkNot(f))
