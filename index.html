@@ -114,7 +114,7 @@
         <div class="col-sm-8  p-3" style="border-left: 1px solid black;background-color:#f5f5f5;border-radius:0em 1em 0em 0em">
           <h4>Normative scenario editor</h4>
           <hr class="mt-0 mb-1">
-          <div class="input-group">
+          <div class="form-group">
             <label for="input"><b>Input</b> (situation)</label>
             <div class="input-group mb-2">
               <div class="input-group-prepend">
@@ -123,7 +123,7 @@
               <input type="text" class="form-control text-monospace" id="input" placeholder="Comma seperated list of formulas ...">
             </div>
           </div>
-          <div class="input-group">
+          <div class="form-group">
             <label for="norms"><b>Norms</b></label>
             <div class="input-group mb-2">
               <div class="input-group-prepend">
@@ -132,16 +132,19 @@
               <textarea class="form-control text-monospace" id="norms" rows="3" placeholder="Newline separated list of norms (a,x)"></textarea>
             </div>
           </div>
-          <div class="input-group">
+          <div class="form-group">
             <label for="constraints"><b>Constraints</b></label>
             <div class="input-group mb-2">
               <div class="input-group-prepend">
                 <div class="input-group-text">C</div>
               </div>
               <input type="text" class="form-control text-monospace" id="constraints" placeholder="Comma seperated list of formulas ..." disabled>
+              <div class="input-group-append">
+                <button id="copy-constraints" class="btn btn-secondary" type="button" disabled>Use A</button>
+              </div>
             </div>
           </div>
-          <div class="input-group">
+          <div class="form-group">
             <label for="output"><b>Output</b> <span class="text-muted small">(required for output checking, automatically populated when generating the output set)</span></label>
             <div class="input-group mb-2">
               <div class="input-group-prepend">

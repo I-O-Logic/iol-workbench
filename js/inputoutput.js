@@ -79,33 +79,34 @@ iol = new function() { const lib = this;
     })
   }
   
+  // Constrained IOL
   lib.maxFamily = function(out,N,A,C) {
     let NN = [N]
     let result = []
     
-    console.log("N", N)
-    console.log("NN", NN)
-    console.log("A", A)
-    console.log("C", C)
+    //console.log("N", N)
+    //console.log("NN", NN)
+    //console.log("A", A)
+    //console.log("C", C)
        
     while (!(_.isEmpty(NN))) {
-      console.log("####")
+      //console.log("####")
       const n0 = _.size(_.sample(NN))
-      console.log("n0", n0)
-      console.log("NN[0]", NN[0])
+      //console.log("n0", n0)
+      //console.log("NN[0]", NN[0])
       NNC = _.filter(NN, function(x) {
-        console.log("x", x)
+        //console.log("x", x)
         return pltk.consistent(out(A,x).concat(C))
       })
-      console.log("NNC", NNC)
+      //console.log("NNC", NNC)
       result = _.concat(result, NNC)
       NNNotC = _.without(NN,NNC)
-      console.log("NNNotC", NNNotC)
+      //console.log("NNNotC", NNNotC)
       
       NN = _.uniqWith(_.flatMap(NNNotC,subsetsOneSmaller), _.isEqual)
-      console.log("subsets of NN", NN)
+      //console.log("subsets of NN", NN)
       NN = _.filter(NN, function(n) {return !_.some(result, r => subset(n,r))})
-      console.log("NN", NN)
+      //console.log("NN", NN)
     }
     return result
   }
@@ -118,8 +119,15 @@ iol = new function() { const lib = this;
     return _.map(NN, x => out(A, x))
   }
   
+  lib.credolousNetOutput = function(NN) {
+    return _.unionWith(...NN, _.isEqual)
+  }
   
+  lib.skepticalNetOutput = function(NN) {
+    return _.intersectionWith(...NN, _.isEqual)
+  }
   
+  // Utility
   let subset = function(a,b) {
     return _.difference(a, b).length === 0
   }
@@ -202,15 +210,23 @@ $(document).ready(function() {
         $('#radio-net-credulous').click()
       }
       $('#constraints').prop("disabled", false);
+      $('#copy-constraints').prop("disabled", false);
     } else {
       constraints = false
       $('#radio-net-credulous').prop("disabled", true);
       $('#radio-net-skeptical').prop("disabled", true);
       $('#constraints').prop("disabled", true);
+      $('#copy-constraints').prop("disabled", true);
     }
   });
   $('input[type=radio][name=io-constrained-net]').change(function() {
-    netOutput = this.value
+    switch (this.value) {
+      case "net-skeptical": netOutput = iol.skepticalNetOutput; break;
+      case "net-credulous": netOutput = iol.credolousNetOutput; break;
+      default:
+        alert("This should not happen; tell Alex :-)")
+        // should not happen
+    }
   });
   $('input[type=radio][name=out]').change(function() {
     switch (this.value) {
@@ -223,6 +239,10 @@ $(document).ready(function() {
         // should not happen
     }
   });
+  $("#copy-constraints").click(function(){
+    $('#constraints').val($('#input').val())
+  });
+  
   
   // iol functionality
   $("#outputButton").click(function(){
@@ -231,14 +251,15 @@ $(document).ready(function() {
     const Ctext = $('#constraints').val()
     
     let Aval = []
+    let Nval = []
+    let Cval = []
+    
     if (Atext.length > 0) {
       Aval = Atext.split(',').map(plparse.read)
     }
-    let Nval = []
     if (Ntext.length > 0) {
       Nval = Ntext.trim().split('\n').filter(y => y.length > 0).map(x => x.trim().slice(1,-1).split(',').map(plparse.read))
     }
-    let Cval = []
     if (Ctext.length > 0) {
       Cval = Ctext.split(',').map(plparse.read)
     }
@@ -247,14 +268,14 @@ $(document).ready(function() {
     console.log("result", result, pltk.plprintset(result))
     let resultText = pltk.plprintset(result)
     $("#output").val("Cn(".concat(resultText,")"))
-    /*console.log("consequence:", pltk.consequence(result, xval))
-    console.log("cval", pltk.plprintset(Cval))
-    let result2 = iol.maxFamily(iol.out1set, Nval, Aval, Cval)
+    //console.log("consequence:", pltk.consequence(result, xval))
+    //console.log("cval", pltk.plprintset(Cval))
+    let result2 = iol.maxFamily(iol.out3set, Nval, Aval, Cval)
     console.log("result2", result2)
-    let result3 = iol.outFamily0(iol.out1set, result2, Aval)
+    let result3 = iol.outFamily0(iol.out3set, result2, Aval)
     console.log("result3", result3)
-    let result4 = _.intersectionWith(...result3, _.isEqual)
-    console.log("result4", result4, pltk.plprintset(result4))*/
+    let result4 = netOutput(result3)
+    console.log("result4", result4, pltk.plprintset(result4))
   });
   
   $("#checkButton").click(function(){
