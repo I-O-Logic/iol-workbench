@@ -166,37 +166,59 @@ const positiveAnswer = "Yes, the formula x is in the output set."
 $(document).ready(function() {
   // Examples
   $("#example1button").click(function(){
-    $("#output").removeClass("is-invalid")
-    $("#input").val('a,b')
+    $("input[type=text]").removeClass("is-invalid")
+    $("#input").attr('value', 'a,b')
     //$("#norms").val('(a,x)\n(b,y)')
     $("#norms").val('(a,x)\n(b,(x | y) & (x | ~y))')
     $("#constraints").val('c')
-    $("#output").val('x & y')
+    $("#output").attr('value', 'x & y')
   });
   $("#example2button").click(function(){
-    $("#output").removeClass("is-invalid")
+    $("input[type=text]").removeClass("is-invalid")
     $("#input").val('a|b')
     $("#norms").val('(a,x)\n(b,x)')
     $("#output").val('x')
   });
   $("#example3button").click(function(){
-    $("#output").removeClass("is-invalid")
+    $("input[type=text]").removeClass("is-invalid")
     $("#input").val('a,b')
     $("#norms").val('(a,x)\n(b,y)\n(a&b,z)')
     $("#output").val('z')
   });
+  $("#example4button").click(function(){
+    $("input[type=text]").removeClass("is-invalid")
+    $("#input").val('~helping')
+    $("#norms").val('(T,helping)\n(helping,telling)\n(~helping,~telling)')
+    $("#constraints").val('')
+    $("#output").val('')
+  });
+  $("#example5button").click(function(){
+    $("input[type=text]").removeClass("is-invalid")
+    $("#input").val('killing')
+    $("#norms").val('(T,~killing)\n(killing,killing & killingGently)')
+    $("#constraints").val('')
+    $("#output").val('')
+  });
+  $("#example6button").click(function(){
+    $("input[type=text]").removeClass("is-invalid")
+    $("#input").val('')
+    $("#norms").val('(T,armyService | alternativeService)\n(T,~ armyService)')
+    $("#constraints").val('')
+    $("#output").val('')
+  });
+
 
   // Parse error handling
-  $("#input").on("keyup", function(event) {
+  $("#input").on('input', function(e) {
     $("#input").removeClass("is-invalid")
   });
-  $("#norms").on("keyup", function(event) {
+  $("#norms").on("input", function(event) {
     $("#norms").removeClass("is-invalid")
   });
-  $("#constraints").on("keyup", function(event) {
+  $("#constraints").on("input", function(event) {
     $("#constraints").removeClass("is-invalid")
   });
-  $("#output").on("keyup", function(event) {
+  $("#output").on("input", function(event) {
     $("#output").removeClass("is-invalid")
   });
   
