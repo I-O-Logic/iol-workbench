@@ -75,14 +75,14 @@ iol = new function() { const lib = this;
     }
   }
   
-  let getDirectlyTriggeredNorms = function(A,N) {
+  const getDirectlyTriggeredNorms = function(A,N) {
     return _.filter(N, n => pltk.consequence(A, n[0]))
   }
-  let body = function(n) { return n[0] }
-  let bodies = function(N) { return _.map(N, body) }
-  let head = function(n) { return n[1] }
-  let heads = function(N) { return _.map(N, head) }
-  let materialization = function(N) {
+  const body = function(n) { return n[0] }
+  const bodies = function(N) { return _.map(N, body) }
+  const head = function(n) { return n[1] }
+  const heads = function(N) { return _.map(N, head) }
+  const materialization = function(N) {
     return _.map(N, n => pltk.mkDisjs([pltk.mkNot(body(n)),head(n)]))
   }
   
