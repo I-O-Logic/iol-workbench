@@ -17,8 +17,8 @@
   <body>
     <div class="container">
       <div class="row">
-        <div class="col-sm">
-          <h1 style="text-align:center">I/O Logics workbench</h1>
+        <div class="col-sm text-center">
+          <h1 class="h2" style="font-variant:small-caps">I/O Logics Workbench</h1>
         </div>
       </div>
       <div class="row">
@@ -75,7 +75,7 @@
               out<sub>4</sub> (Basic Reusable)
             </label>
           </div>
-          <h4 class="mt-1">Parameters</h4>
+          <h4 class="mt-1">Parameters <span class="text-muted small">(todo)</span></h4>
           <div class="form-check">
             <input class="form-check-input cursor-na" type="checkbox" name="io-throughput" id="checkbox-io-throughput" value="" disabled>
             <label class="form-check-label cursor-na" for="checkbox-io-throughput" title="Not yet supported.">
@@ -83,21 +83,21 @@
             </label>
           </div>
           <div class="form-check">
-            <input class="form-check-input cursor-pointer" type="checkbox" name="io-constrained" id="checkbox-constrained" value="">
-            <label class="form-check-label cursor-pointer" for="checkbox-constrained">
+            <input class="form-check-input cursor-na" type="checkbox" name="io-constrained" id="checkbox-constrained" value="" disabled>
+            <label class="form-check-label cursor-na" for="checkbox-constrained">
               Constrained
             </label>
           </div>
           <div class="ml-3">
             <div class="form-check">
-              <input class="form-check-input cursor-pointer" type="radio" name="io-constrained-net" id="radio-net-credulous" value="net-credulous" disabled>
-              <label class="form-check-label cursor-pointer" for="radio-net-credulous">
+              <input class="form-check-input cursor-na" type="radio" name="io-constrained-net" id="radio-net-credulous" value="net-credulous" disabled>
+              <label class="form-check-label cursor-na" for="radio-net-credulous">
                 Credulous net output
               </label>
             </div>
             <div class="form-check">
-              <input class="form-check-input cursor-pointer" type="radio" name="io-constrained-net" id="radio-net-skeptical" value="net-skeptical" disabled>
-              <label class="form-check-label cursor-pointer" for="radio-net-skeptical">
+              <input class="form-check-input cursor-na" type="radio" name="io-constrained-net" id="radio-net-skeptical" value="net-skeptical" disabled>
+              <label class="form-check-label cursor-na" for="radio-net-skeptical">
                 Skeptical net output
               </label>
             </div>
@@ -128,7 +128,7 @@
           <hr class="mt-0 mb-1">
           <div class="form-group">
             <label for="input"><b>Input</b> (situation)</label>
-            <div class="input-group mb-2">
+            <div class="input-group">
               <div class="input-group-prepend">
                 <div class="input-group-text">A</div>
               </div>
@@ -137,7 +137,12 @@
           </div>
           <div class="form-group">
             <label for="norms"><b>Norms</b></label>
-            <div class="input-group mb-2">
+            <!--<span style="" class="text-muted small float-right">
+              <button class="btn btn-outline-secondary btn-sm cursor-na" type="button" disabled>
+                <img src="img/upload.svg" class="feather"> Import
+              </button>
+            </span>-->
+            <div class="input-group">
               <div class="input-group-prepend">
                 <div class="input-group-text">N</div>
               </div>
@@ -146,19 +151,19 @@
           </div>
           <div class="form-group">
             <label for="constraints"><b>Constraints</b></label>
-            <div class="input-group mb-2">
+            <div class="input-group">
               <div class="input-group-prepend">
                 <div class="input-group-text">C</div>
               </div>
               <input type="text" class="form-control text-monospace" id="constraints" placeholder="Comma seperated list of formulas ..." disabled>
               <div class="input-group-append">
-                <button id="copy-constraints" class="btn btn-secondary" type="button" disabled>Use A</button>
+                <button id="copy-constraints" class="btn btn-secondary cursor-na" type="button" disabled>Use A</button>
               </div>
             </div>
           </div>
           <div class="form-group">
             <label for="output"><b>Output</b> <span class="text-muted small">(required for output checking, automatically populated when generating the output set)</span></label>
-            <div class="input-group mb-2">
+            <div class="input-group">
               <div class="input-group-prepend">
                 <div class="input-group-text">X</div>
               </div>
@@ -168,9 +173,9 @@
           <div class="alert alert-success show" role="alert" id="response" style="visibility:collapse">
             <b>Result:</b> <span id="response-text">Yes, x is in the output set.</span>
           </div>
-          <div class="d-flex justify-content-around mt-2">
-            <button id="outputButton" type="button" class="btn btn-primary flex-fill mr-1">Generate output set</button>
+          <div class="d-flex justify-content-around">
             <button id="checkButton" type="button" class="btn btn-primary flex-fill mr-1">Check given output</button>
+            <button id="outputButton" type="button" class="btn btn-primary flex-fill cursor-na" disabled>Generate output set</button>
           </div>
         </div>
       </div>

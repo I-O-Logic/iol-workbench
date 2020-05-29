@@ -23,3 +23,8 @@ body {
   line-height: 24px; 
   background-color: #eeeeee;
 }
+
+.feather {
+  width: 18px;
+  height: 18px;
+}

@@ -294,7 +294,7 @@ pltk = new function() { const lib = this;
     }
   }
   
-  /* remove subsumed disjunctive clauses from input set*/
+  /* remove subsumed disjunctive clauses from input set and propagate units for simplication*/
   lib.disjclausesetInterreduce = function(fs) {
     let P = []
     let U = fs.slice()
@@ -305,11 +305,15 @@ pltk = new function() { const lib = this;
         /* skip */
       } else {
         P = _.filter(P, x => !lib.disjClauseSubsumes(g, x))
+        if (lib.isUnitFormula(g)) {
+          // todo
+        }
         P.push(g)
       }
     }
     return P
   }
+  
   
   /* true if a subsumes b */
   lib.disjClauseSubsumes = function(a,b) {
@@ -317,7 +321,26 @@ pltk = new function() { const lib = this;
     let litsB = _.uniqWith(lib.disjs(b), _.isEqual)
     return _.isEmpty(_.differenceWith(litsA,litsB, _.isEqual))
   }
+  
+  lib.isUnit = function(fs) {
+    return _.size(fs) == 1
+  }
+  
+  lib.isUnitFormula = function(f) {    
+    if (lib.isNeg(f)) {
+      const body = f.args[0]
+      return lib.isVariable(body)
+    } 
+    return lib.isVariable(f)
+  }
  
+  lib.isVariable = function(f) {
+    return _.get(f, 'op', '') == 'Var'
+  }
+  
+  lib.isNeg = function(f) {
+    return _.get(f, 'op', '') == '~'
+  }
  
   lib.isT = function(f) {
     return _.has(f,'op') && f.op == 'LT'

@@ -79,6 +79,10 @@ iol = new function() { const lib = this;
     })
   }
   
+  lib.out4set = function(A,N) {
+    // take out2set
+  }
+  
   // Constrained IOL
   lib.maxFamily = function(out,N,A,C) {
     let NN = [N]
@@ -167,22 +171,24 @@ $(document).ready(function() {
   // Examples
   $("#example1button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
-    $("#input").attr('value', 'a,b')
+    $("#input").val('a,b')
     //$("#norms").val('(a,x)\n(b,y)')
     $("#norms").val('(a,x)\n(b,(x | y) & (x | ~y))')
-    $("#constraints").val('c')
-    $("#output").attr('value', 'x & y')
+    $("#constraints").val('')
+    $("#output").val('x & y')
   });
   $("#example2button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
     $("#input").val('a|b')
     $("#norms").val('(a,x)\n(b,x)')
+    $("#constraints").val('')
     $("#output").val('x')
   });
   $("#example3button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
     $("#input").val('a,b')
-    $("#norms").val('(a,x)\n(b,y)\n(a&b,z)')
+    $("#norms").val('(a,x)\n(b,y)\n(x&y,z)')
+    $("#constraints").val('')
     $("#output").val('z')
   });
   $("#example4button").click(function(){
@@ -286,18 +292,18 @@ $(document).ready(function() {
       Cval = Ctext.split(',').map(plparse.read)
     }
     
-    let result = iol.out3set(Aval,Nval)
+    let result = iol.out2set(Aval,Nval)
     console.log("result", result, pltk.plprintset(result))
     let resultText = pltk.plprintset(result)
     $("#output").val("Cn(".concat(resultText,")"))
     //console.log("consequence:", pltk.consequence(result, xval))
     //console.log("cval", pltk.plprintset(Cval))
-    let result2 = iol.maxFamily(iol.out3set, Nval, Aval, Cval)
+    /*let result2 = iol.maxFamily(iol.out2set, Nval, Aval, Cval)
     console.log("result2", result2)
-    let result3 = iol.outFamily0(iol.out3set, result2, Aval)
+    let result3 = iol.outFamily0(iol.out2set, result2, Aval)
     console.log("result3", result3)
     let result4 = netOutput(result3)
-    console.log("result4", result4, pltk.plprintset(result4))
+    console.log("result4", result4, pltk.plprintset(result4))*/
   });
   
   $("#checkButton").click(function(){
