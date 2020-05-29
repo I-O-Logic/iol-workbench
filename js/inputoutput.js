@@ -1,20 +1,98 @@
 iol = new function() { const lib = this;
-  lib.out1 = function(A,N,x) {
-    let N2 = N.filter(n => pltk.consequence(A, n[0]))
-    let M = N2.map(n => n[1])
-    return pltk.consequence(M, x)
+
+  /////////////////////
+  // in-outset operations
+  /////////////////////
+  lib.out1 = function(A, N, x, throughput) {
+    const N2 = getDirectlyTriggeredNorms(A,N)
+    const M = heads(N2)
+    if (_.isUndefined(throughput) || throughput === false) {
+      // without throughput
+      return pltk.consequence(M, x)
+    } else {
+      // with throughput
+      return pltk.consequence(M.concat(A), x)
+    }
   }
   
+  lib.out2 = function(A, N, x, throughput) {
+    if (_.isUndefined(throughput) || throughput === false) {
+      // without throughput
+      const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
+      return dnf.every(y => lib.out1([y],N,x))
+    } else {
+      // with throughput
+      const m = materialization(N)
+      return pltk.consequence(m.concat(A), x)
+    }
+  }
+  
+  lib.out3 = function(A, N, x, throughput) {
+    // Select trigger function: Include A if with throughput
+    let outputTriggered = function() { return pltk.consequence(heads(N2),x) }
+    if (throughput === true) {
+      outputTriggered = function() { return pltk.consequence(heads(N2).concat(A),x) }
+    }
+    let A2 = A.slice()
+    let N2 = getDirectlyTriggeredNorms(A,N)
+    let NN = _.without(N, ...N2)
+    while (!outputTriggered()) {
+      A2 = A2.concat(heads(N2))
+      let M = getDirectlyTriggeredNorms(A2, NN)
+      if (M.length == 0) {
+        return false
+      } else {
+        N2 = N2.concat(M)
+        NN = _.without(NN, ...M)
+      }
+    }
+    return true
+  }
+  
+  lib.out4 = function(A, N, x, throughput) {
+    if (_.isUndefined(throughput) || throughput === false) {
+      // without throughput
+      const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
+      return dnf.every(function(y) {
+        let A3 = [y]
+        let N2 = getDirectlyTriggeredNorms(A3,N)
+        let NN = _.without(N, ...N2)
+        if (!pltk.consequence(heads(N2),x)) {
+          A3 = A3.concat(heads(N2))
+          A4 = pltk.disjs(pltk.dnf(pltk.mkConjs(A3)))
+          return A4.every(function(y2) {
+            let M = NN.filter(n => pltk.consequence([y2], n[0]))
+            if (M.length == 0) return false
+            else {
+              return lib.out4([y2],N,x)
+            }
+          })
+        } else return true
+      })
+    } else {
+      // with throughput: same as out2 with throughput
+      return lib.out2(A,N,x,throughput)
+    }
+  }
+  
+  let getDirectlyTriggeredNorms = function(A,N) {
+    return _.filter(N, n => pltk.consequence(A, n[0]))
+  }
+  let body = function(n) { return n[0] }
+  let bodies = function(N) { return _.map(N, body) }
+  let head = function(n) { return n[1] }
+  let heads = function(N) { return _.map(N, head) }
+  let materialization = function(N) {
+    return _.map(N, n => pltk.mkDisjs([pltk.mkNot(body(n)),head(n)]))
+  }
+  
+  /////////////////////
+  // outset operations
+  /////////////////////
   lib.out1set = function(A,N) {
     let N2 = N.filter(n => pltk.consequence(A, n[0]))
     let M = N2.map(n => n[1])
     return canonizeOut(M)
-  }
-  
-  lib.out2 = function(A,N,x) {
-    let dnf = pltk.dnf(pltk.mkConjs(A))
-    let A2 = pltk.disjs(dnf)
-    return A2.every(y => lib.out1([y],N,x))
   }
   
   lib.out2set = function(A,N) {
@@ -25,23 +103,6 @@ iol = new function() { const lib = this;
     let result = _.intersectionWith(...Ns, _.isEqual)
     //console.log("result",pltk.plprintset(result))
     return result
-  }
-  
-  lib.out3 = function(A,N,x) {
-    let A2 = A.slice()
-    let N2 = N.filter(n => pltk.consequence(A2, n[0]))
-    let NN = N.filter(n => !N2.includes(n))
-    while (!pltk.consequence(N2.map(n => n[1]),x)) {
-      A2 = A2.concat(N2.map(n => n[1]))
-      let M = NN.filter(n => pltk.consequence(A2, n[0]))
-      if (M.length == 0) {
-        return false
-      } else {
-        N2 = N2.concat(M)
-        NN = NN.filter(n => !M.includes(n))
-      }
-    }
-    return true
   }
   
   lib.out3set = function(A,N) {
@@ -58,30 +119,13 @@ iol = new function() { const lib = this;
     return canonizeOut(N2.map(n => n[1]))
   }
   
-  lib.out4 = function(A,N,x) {
-    let dnf = pltk.dnf(pltk.mkConjs(A))
-    let A2 = pltk.disjs(dnf)
-    return A2.every(function(y) {
-      let A3 = [y]
-      let N2 = N.filter(n => pltk.consequence(A3, n[0]))
-      let NN = N.filter(n => !N2.includes(n))
-      if (!pltk.consequence(N2.map(n => n[1]),x)) {
-        A3 = A3.concat(N2.map(n => n[1]))
-        A4 = pltk.disjs(pltk.dnf(pltk.mkConjs(A3)))
-        return A4.every(function(y2) {
-          let M = NN.filter(n => pltk.consequence([y2], n[0]))
-          if (M.length == 0) return false
-          else {
-            return lib.out4([y2],N,x)
-          }
-        })
-      } else return true
-    })
-  }
-  
   lib.out4set = function(A,N) {
     // take out2set
   }
+  
+  /////////////////////
+  // cIOL operations
+  /////////////////////
   
   // Constrained IOL
   lib.maxFamily = function(out,N,A,C) {
@@ -172,8 +216,8 @@ $(document).ready(function() {
   $("#example1button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
     $("#input").val('a,b')
-    //$("#norms").val('(a,x)\n(b,y)')
-    $("#norms").val('(a,x)\n(b,(x | y) & (x | ~y))')
+    $("#norms").val('(a,x)\n(b,y)')
+    //$("#norms").val('(a,x)\n(b,(x | y) & (x | ~y))')
     $("#constraints").val('')
     $("#output").val('x & y')
   });
@@ -228,6 +272,13 @@ $(document).ready(function() {
     $("#output").removeClass("is-invalid")
   });
   
+  $('#checkbox-io-throughput').change(function() {
+    if (this.checked) {
+      throughput = true
+    } else {
+      throughput = false
+    }
+  })
   // GUI state
   $('#checkbox-constrained').change(function() {
     if (this.checked) {
@@ -373,7 +424,7 @@ $(document).ready(function() {
       out = iol.out4
     }*/
     
-    let result = outfunction(Aval,Nval,xval)
+    let result = outfunction(Aval,Nval,xval, throughput)
     if (result != null) {
       if (result) {
         $('#response').addClass("alert-success")
