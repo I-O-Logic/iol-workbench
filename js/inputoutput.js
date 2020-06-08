@@ -41,9 +41,6 @@ iol = new function() { const lib = this;
         //console.log("N3", N3)
         const N4 = _.filter(N3, n => _.isEmpty(body(n)))
         const NN = _.without(N3, ...N4)
-        /*const N5 = _.filter(NN, function(n) {
-          return _.some(_.without(NN, n), function(n2) {return pltk.tautology( pltk.mkDisjs([pltk.mkConjs(body(n)),pltk.mkConjs(body(n2))]) ) && pltk.consequence([head(n2)],head(n)) })
-        });*/
         
         // for each norm:
         // get compatible norms (compatible head) [including itself?]
@@ -91,6 +88,65 @@ iol = new function() { const lib = this;
   }
   
   lib.out4 = function(A, N, x, throughput) {
+    if (_.isUndefined(throughput) || throughput === false) {
+      // without throughput
+      const N2 = _.map(N, function(n) { return [pltk.conjs(pltk.cnf(body(n))), head(n)] })
+      const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
+      return _.every(dnf, function(clause) {
+        let A2 = [clause]
+        const N3 = _.map(N2, function(n) {
+          return [_.reject(body(n), x => pltk.consequence([clause], x)),head(n)]
+        });
+        //console.log("N3", N3)
+        const N4 = _.filter(N3, n => _.isEmpty(body(n)))
+        const N5 = _.without(N3, ...N4)
+        const N6 = _.filter(N5, function(n) {
+            console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
+            const compat = lib.getCompatibleNorms(N5,n)
+            console.log("compat of this: ", _.map(compat, lib.printnorm))
+            const compatBodies = _.map(compat, m => pltk.mkConjs(body(m)))
+            console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
+            const together = pltk.mkDisjs(compatBodies)
+            console.log("together: ", pltk.plprint(together))
+            return pltk.tautology(together)
+          })
+        const NN = _.without(N5, ...N6)
+        if (pltk.consequence(heads(N4).concat(heads(N6)), x)) {
+          return true
+        } else {
+          A2 = A2.concat(heads(N4).concat(heads(N6)))
+          A3 = pltk.disjs(pltk.dnf(pltk.mkConjs(A2)))
+          return _.every(A3, function(y2) {
+            const M = _.map(NN, function(n) {
+              return [_.reject(body(n), x => pltk.consequence([y2], x)),head(n)]
+            });
+            const M2 = _.filter(M, n => _.isEmpty(body(n)))
+        const M3 = _.without(M, ...M2)
+        const M4 = _.filter(M3, function(n) {
+            console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
+            const compat = lib.getCompatibleNorms(M3,n)
+            console.log("compat of this: ", _.map(compat, lib.printnorm))
+            const compatBodies = _.map(compat, m => pltk.mkConjs(body(m)))
+            console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
+            const together = pltk.mkDisjs(compatBodies)
+            console.log("together: ", pltk.plprint(together))
+            return pltk.tautology(together)
+          })
+           const together = M2.concat(M4)
+           if (together.length == 0) return false
+           else {
+            return lib.out4([y2],N,x)
+           }
+          })
+        }
+      })
+    } else {
+      // with throughput: same as out2 with throughput
+      return lib.out2(A,N,x,throughput)
+    }
+  }
+  
+  lib.out4Old = function(A, N, x, throughput) {
     if (_.isUndefined(throughput) || throughput === false) {
       // without throughput
       const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
