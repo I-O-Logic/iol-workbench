@@ -1,6 +1,5 @@
 # I/O Logic Workbench
 *A browser-based automated reasoner for Input/Output Logics*
------------------------------
 
 Input/Output (I/O) logics have been devised by Makinson and van der Torre [1]
 as a class of formal systems for norm-based deontic reasoning. Intuitively,
@@ -60,6 +59,9 @@ information for A, N and x and press "check given output".
 - [ ] Constrained I/O logic
 - [ ] Calculation of finite basis of output set
 - [ ] Norm preferences
+
+Current version: 0.3
+Last update: Some bug fixes and beautification of graphical interface.
 
 ## References
 
