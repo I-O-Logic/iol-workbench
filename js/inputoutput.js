@@ -87,6 +87,7 @@ iol = new function() { const lib = this;
     return true
   }
   
+  /* This is a prototypical implementation. This can be made much more elegant: TODO */
   lib.out4 = function(A, N, x, throughput) {
     if (_.isUndefined(throughput) || throughput === false) {
       // without throughput
