@@ -35,7 +35,7 @@ The Workbench looks like this (depending a bit on your browser):
 The graphical user interface consists of two main panels: The configuration panel (on the left)
 and the main panel (on the right):
 
-<img alt="The configuration panel" src="/doc/left.png" width="300" style="float:left">
+<img alt="The configuration panel" src="/doc/left.png" width="300">
 
 In the left menu panel, a user can choose which out operation should be used for the reasoning process.
 Please note that there are already some disabled configuration settings that are not yet supported.
@@ -50,10 +50,16 @@ respectively. The input A is a comma separated list of formulas, whereas the
 set of norms N is, as usual, represented as a set of pairs. Every norm is entered
 as a separate line in the text area. 
 
-## Roadmap
+To check whether a formula is in the output set of the selected out operator, enter the respective
+information for A, N and x and press "check given output".
 
+## Roadmap / Version history
 
-## Version history
+- [X] Unconstrained I/O logic (since 0.1)
+- [X] Throughput (since 0.2)
+- [ ] Constrained I/O logic
+- [ ] Calculation of finite basis of output set
+- [ ] Norm preferences
 
 ## References
 
