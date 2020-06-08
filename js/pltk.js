@@ -306,12 +306,26 @@ pltk = new function() { const lib = this;
       } else {
         P = _.filter(P, x => !lib.disjClauseSubsumes(g, x))
         if (lib.isUnitFormula(g)) {
+          const lit = lib.getLitAsVar(g)
+          const replaceBy = lib.getLitPolarity(g)
+          
           // todo
         }
         P.push(g)
       }
     }
     return P
+  }
+  
+  lib.disjClauseReplaceAll = function(clause, what, by) {
+    const lits = pltk.disjs(clause)
+    
+  }
+  
+  lib.replaceBy = function(it,what,by) {
+    if (_.isEqual(it, what)) {
+      return by
+    } else return it
   }
   
   
@@ -340,6 +354,22 @@ pltk = new function() { const lib = this;
   
   lib.isNeg = function(f) {
     return _.get(f, 'op', '') == '~'
+  }
+  
+  lib.getLitPolarity = function(lit) {
+    if (lib.isVariable(lit)) {
+      return { op: 'LT', args: []}
+    } else {
+      return { op: 'LF', args: []}
+    }
+  }
+  
+  lib.getLitAsVar = function(lit) {
+    if (lib.isVariable(lit)) {
+      return lit
+    } else {
+      return lit.args[0]
+    }
   }
  
   lib.isT = function(f) {
@@ -390,7 +420,8 @@ pltk = new function() { const lib = this;
     if (f == null) return null
     
     let simp = lib.simp(f)
-    let cnf = lib.cnf(simp)
+    let cnf0 = lib.cnf(simp)
+    let cnf = lib.cnfsimp(cnf0)
     
     if (cnf.op == 'LT') return []
     if (cnf.op == 'LF') return [[]]
@@ -449,9 +480,21 @@ pltk = new function() { const lib = this;
   }
   
   lib.consequence = function(assumptions,f) {
+    console.log("consequence:", lib.plprintset(assumptions), lib.plprint(f))
     let formulas = assumptions.slice()
     formulas.push(lib.mkNot(f))
     return lib.unsat(lib.mkConjs(formulas))
+  }
+  
+  lib.tautology = function(f) {
+    return lib.unsat(lib.mkNot(f))
+  }
+  
+  lib.equivalent = function(f,g) {
+    console.log("equivalent", pltk.plprint(f), pltk.plprint(g))
+    const impl = lib.mkDisjs([lib.mkNot(f),g])
+    const lpmi = lib.mkDisjs([lib.mkNot(g),f])
+    return lib.tautology(lib.mkConjs([impl,lpmi]))
   }
  
 }
