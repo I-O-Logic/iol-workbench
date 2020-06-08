@@ -35,7 +35,7 @@ The Workbench looks like this (depending a bit on your browser):
 The graphical user interface consists of two main panels: The configuration panel (on the left)
 and the main panel (on the right):
 
-<img alt="The configuration panel" src="/doc/left.png" width="250">
+<img alt="The configuration panel" src="/doc/left.png" width="300" style="float:left">
 
 In the left menu panel, a user can choose which out operation should be used for the reasoning process.
 Please note that there are already some disabled configuration settings that are not yet supported.
