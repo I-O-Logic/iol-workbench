@@ -61,6 +61,7 @@ information for A, N and x and press "check given output".
 - [ ] Norm preferences
 
 Current version: 0.3
+
 Last update: Some bug fixes and beautification of graphical interface.
 
 ## References
