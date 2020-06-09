@@ -480,7 +480,7 @@ pltk = new function() { const lib = this;
   }
   
   lib.consequence = function(assumptions,f) {
-    console.log("consequence:", lib.plprintset(assumptions), lib.plprint(f))
+    //console.log("consequence:", lib.plprintset(assumptions), lib.plprint(f))
     let formulas = assumptions.slice()
     formulas.push(lib.mkNot(f))
     return lib.unsat(lib.mkConjs(formulas))
@@ -491,7 +491,7 @@ pltk = new function() { const lib = this;
   }
   
   lib.equivalent = function(f,g) {
-    console.log("equivalent", pltk.plprint(f), pltk.plprint(g))
+    //console.log("equivalent", pltk.plprint(f), pltk.plprint(g))
     const impl = lib.mkDisjs([lib.mkNot(f),g])
     const lpmi = lib.mkDisjs([lib.mkNot(g),f])
     return lib.tautology(lib.mkConjs([impl,lpmi]))

@@ -54,8 +54,68 @@ iol = new function() { const lib = this;
     return true
   }
   
-  /* This is a prototypical implementation. This can be made much more elegant: TODO */
   lib.out4 = function(A, N, x, throughput) {
+    if (_.isUndefined(throughput) || throughput === false) {
+      // without throughput
+      const cnfN = _.map(N, function(n) { return [pltk.conjs(pltk.cnf(body(n))), head(n)] })
+      const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
+      return _.every(dnf, function(clause) {
+        const triggeredNorms = getBasicTriggeredNorms([clause],cnfN )
+        let A2 = [clause]
+        const N3 = _.map(N2, function(n) {
+          return [_.reject(body(n), x => pltk.consequence([clause], x)),head(n)]
+        });
+        //console.log("N3", N3)
+        const N4 = _.filter(N3, n => _.isEmpty(body(n)))
+        const N5 = _.without(N3, ...N4)
+        const N6 = _.filter(N5, function(n) {
+            console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
+            const compat = lib.getCompatibleNorms(N5,n)
+            console.log("compat of this: ", _.map(compat, lib.printnorm))
+            const compatBodies = _.map(compat, m => pltk.mkConjs(body(m)))
+            console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
+            const together = pltk.mkDisjs(compatBodies)
+            console.log("together: ", pltk.plprint(together))
+            return pltk.tautology(together)
+          })
+        const NN = _.without(N5, ...N6)
+        if (pltk.consequence(heads(N4).concat(heads(N6)), x)) {
+          return true
+        } else {
+          A2 = A2.concat(heads(N4).concat(heads(N6)))
+          A3 = pltk.disjs(pltk.dnf(pltk.mkConjs(A2)))
+          return _.every(A3, function(y2) {
+            const M = _.map(NN, function(n) {
+              return [_.reject(body(n), x => pltk.consequence([y2], x)),head(n)]
+            });
+            const M2 = _.filter(M, n => _.isEmpty(body(n)))
+        const M3 = _.without(M, ...M2)
+        const M4 = _.filter(M3, function(n) {
+            console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
+            const compat = lib.getCompatibleNorms(M3,n)
+            console.log("compat of this: ", _.map(compat, lib.printnorm))
+            const compatBodies = _.map(compat, m => pltk.mkConjs(body(m)))
+            console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
+            const together = pltk.mkDisjs(compatBodies)
+            console.log("together: ", pltk.plprint(together))
+            return pltk.tautology(together)
+          })
+           const together = M2.concat(M4)
+           if (together.length == 0) return false
+           else {
+            return lib.out4([y2],N,x)
+           }
+          })
+        }
+      })
+    } else {
+      // with throughput: same as out2 with throughput
+      return lib.out2(A,N,x,throughput)
+    }
+  }
+  
+  /* This is a prototypical implementation. This can be made much more elegant: TODO */
+  lib.out4Old2 = function(A, N, x, throughput) {
     if (_.isUndefined(throughput) || throughput === false) {
       // without throughput
       const N2 = _.map(N, function(n) { return [pltk.conjs(pltk.cnf(body(n))), head(n)] })
@@ -145,38 +205,71 @@ iol = new function() { const lib = this;
   /////////////////////
   // outset operations
   /////////////////////
-  lib.out1set = function(A,N) {
+  
+  
+  lib.out1set = function(A, N, throughput) {
     const N2 = getDirectlyTriggeredNorms(A,N)
     const M = heads(N2)
-    return canonizeOut(M)
+    if (_.isUndefined(throughput) || throughput === false) {
+      // without throughput
+      return semanticalInterreduce(M)
+    } else {
+      // with throughput
+      return semanticalInterreduce(M.concat(A))
+    }
   }
   
-  lib.out2set = function(A,N) {
-    let dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
-    //console.log("clauses", pltk.plprintset(dnf))
-    let Ns = _.map(dnf, x => lib.out1set([x],N))
-    //console.log("Ns", Ns, _.map(Ns, pltk.plprintset))
-    let result = _.intersectionWith(...Ns, _.isEqual)
-    //console.log("result",pltk.plprintset(result))
-    return result
+  lib.out2set = function(A, N, throughput) {
+    if (_.isUndefined(throughput) || throughput === false) {
+      // without throughput
+      const cnfN = _.map(N, function(n) { return [pltk.conjs(pltk.cnf(body(n))), head(n)] })
+      const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
+      const triggeredEach = _.map(dnf, clause => heads(getBasicTriggeredNorms([clause],cnfN)))
+      const result = _.reduce(triggeredEach, lib.semanticalIntersection)
+      return semanticalInterreduce(result)
+    } else {
+      // with throughput
+      const m = materialization(N)
+      return semanticalInterreduce(m.concat(A))
+    }
   }
   
-  lib.out3set = function(A,N) {
+  lib.out3set = function(A, N, throughput) {
     let A2 = A.slice() // the incremental set of facts
-    let N2 = N.filter(n => pltk.consequence(A2, n[0])) // the set of triggered norms
+    let N2 = getDirectlyTriggeredNorms(A2,N) // the set of triggered norms
     let NN = _.without(N, ...N2) // The set of not-triggered norms
     let New = N2 // newly triggered norms
     while (!_.isEmpty(New)) { // terminate if no new norms can be triggered
-      A2 = A2.concat(N2.map(n => n[1])) // add facts
-      New = NN.filter(n => pltk.consequence(A2, n[0])) // potentially new triggered norms
+      A2 = A2.concat(heads(N2)) // add facts
+      New = getDirectlyTriggeredNorms(A2, NN) // potentially new triggered norms
       N2 = N2.concat(New) //add to result set
-      NN = NN.filter(n => !New.includes(n)) // remove triggered from NN
+      NN = _.without(NN, ...New) // remove triggered from NN
     }
-    return canonizeOut(N2.map(n => n[1]))
+    if (_.isUndefined(throughput) || throughput === false) {
+      return semanticalInterreduce(heads(N2))
+    } else {
+      return semanticalInterreduce(heads(N2).concat(A))
+    }
   }
   
-  lib.out4set = function(A,N) {
-    // take out2set
+  lib.out4set = function(A, N, throughput) {
+    if (_.isUndefined(throughput) || throughput === false) {
+      // without throughput
+      let lastOut = [{ op: 'LT', args: [] }]
+      let basicOut = lib.out2set(A,N)
+      let triggered = basicOut.concat(lib.out3set(A.concat(basicOut), N))
+      
+      while (!pltk.consequence(lastOut, pltk.mkConjs(triggered))) {
+        lastOut = triggered
+        basicOut = triggered.concat(lib.out2set(lastOut,N))
+        triggered = basicOut.concat(lib.out3set(A.concat(basicOut), N))
+      }
+      
+      return semanticalInterreduce(lastOut)
+    } else {
+      // with throughput
+      return lib.out2set(A,N, throughput)
+    }
   }
   
   /////////////////////
@@ -184,7 +277,7 @@ iol = new function() { const lib = this;
   /////////////////////
   
   // Constrained IOL
-  lib.maxFamily = function(out,N,A,C) {
+  lib.maxFamily = function(out,N,A,C,throughput) {
     let NN = [N]
     let result = []
     
@@ -200,7 +293,7 @@ iol = new function() { const lib = this;
       //console.log("NN[0]", NN[0])
       NNC = _.filter(NN, function(x) {
         //console.log("x", x)
-        return pltk.consistent(out(A,x).concat(C))
+        return pltk.consistent(out(A,x, throughput).concat(C))
       })
       //console.log("NNC", NNC)
       result = _.concat(result, NNC)
@@ -215,20 +308,20 @@ iol = new function() { const lib = this;
     return result
   }
   
-  lib.outFamily = function(out,N,A,C) {
-    const maxfam = lib.maxFamily(out,N,A,C)
-    return _.map(maxfam, x => out(A, x))
+  lib.outFamily = function(out,N,A,C,throughput) {
+    const maxfam = lib.maxFamily(out,N,A,C, throughput)
+    return _.map(maxfam, x => out(A, x, throughput))
   }
-  lib.outFamily0 = function(out, NN, A) {
-    return _.map(NN, x => out(A, x))
+  lib.outFamily0 = function(out, NN, A,throughput) {
+    return _.map(NN, x => out(A, x, throughput))
   }
   
   lib.credolousNetOutput = function(NN) {
-    return _.unionWith(...NN, _.isEqual)
+    return semanticalInterreduce(_.unionWith(...NN, _.isEqual))
   }
   
   lib.skepticalNetOutput = function(NN) {
-    return _.intersectionWith(...NN, _.isEqual)
+    return semanticalInterreduce(_.reduce(NN, lib.semanticalIntersection))
   }
   
   /////////////////////
@@ -323,6 +416,37 @@ iol = new function() { const lib = this;
     return result
   }
   
+  lib.semanticalIntersection = function(A,B) {
+    let result = []
+    _.forEach(A, function(a) {
+      if (pltk.consequence(B,a)) {
+        result.push(a)
+      }
+    })
+    _.forEach(B, function(b) {
+      if (pltk.consequence(A,b)) {
+        result.push(b)
+      }
+    })
+    //console.log("Result: ", pltk.plprintset(result))
+    return result
+  }
+  
+  /* TODO: unit propagation etc. for simplication */
+  const semanticalInterreduce = function(A) {
+    const Asimp = pltk.simpset(A)
+    const Asimpcnf = pltk.conjs(pltk.cnfsimp(pltk.cnf(pltk.mkConjs(Asimp)))) 
+    let result = []
+    _.forEach(Asimpcnf, function(a) {
+      if (!pltk.consequence(result,a)) {
+        result = _.reject(result, r => pltk.consequence([a],r))
+        result.push(a)
+      }
+    })
+    //console.log("Result: ", pltk.plprintset(result))
+    return result
+  }
+  
   lib.printnorm = function(n) {
     if (_.isArrayLike(body(n))) {
       return "(" + pltk.plprintset(body(n)) + "," + pltk.plprint(head(n)) + ")"
@@ -333,6 +457,7 @@ iol = new function() { const lib = this;
 }
 
 outfunction = iol.out1
+outsetfunction = iol.out1set
 throughput = false
 constraints = false
 netOutput = null
@@ -440,10 +565,10 @@ $(document).ready(function() {
   });
   $('input[type=radio][name=out]').change(function() {
     switch (this.value) {
-      case "out1": outfunction = iol.out1; break;
-      case "out2": outfunction = iol.out2; break;
-      case "out3": outfunction = iol.out3; break;
-      case "out4": outfunction = iol.out4; break;
+      case "out1": outfunction = iol.out1;outsetfunction = iol.out1set; break;
+      case "out2": outfunction = iol.out2;outsetfunction = iol.out2set; break;
+      case "out3": outfunction = iol.out3;outsetfunction = iol.out3set; break;
+      case "out4": outfunction = iol.out4;outsetfunction = iol.out4set; break;
       default: 
         alert("This should not happen; tell Alex :-)")
         // should not happen
@@ -459,25 +584,53 @@ $(document).ready(function() {
     const Atext = $("#input").val()
     const Ntext = $("#norms").val()
     const Ctext = $('#constraints').val()
+    const xtext = $("#output").val()
     
     let Aval = []
     let Nval = []
     let Cval = []
-    
+  
     if (Atext.length > 0) {
-      Aval = Atext.split(',').map(plparse.read)
-    }
-    if (Ntext.length > 0) {
-      Nval = Ntext.trim().split('\n').filter(y => y.length > 0).map(x => x.trim().slice(1,-1).split(',').map(plparse.read))
-    }
-    if (Ctext.length > 0) {
-      Cval = Ctext.split(',').map(plparse.read)
+      try {
+        Aval = Atext.split(',').map(plparse.read)
+      } catch(err) {
+        $('#input').addClass("is-invalid")
+        return
+      }
     }
     
-    let result = iol.out2set(Aval,Nval)
-    console.log("result", result, pltk.plprintset(result))
-    let resultText = pltk.plprintset(result)
-    $("#output").val("Cn(".concat(resultText,")"))
+    if (Ntext.length > 0) {
+      try {
+        Nval = Ntext.trim().split('\n').filter(y => y.length > 0).map(x => x.trim().slice(1,-1).split(',').map(plparse.read))
+        N = Nval
+      } catch(err) {
+        $('#norms').addClass("is-invalid")
+        return
+      }
+    }
+    
+    if (Ctext.length > 0) {
+      try {
+        Cval = Ctext.split(',').map(plparse.read)
+      } catch(err) {
+        $('#constraints').addClass("is-invalid")
+        return
+      }
+    }
+  
+    if (constraints) {
+      let outFamily = iol.outFamily(outsetfunction,Nval,Aval,Cval, throughput)
+      let result = netOutput(outFamily)
+      console.log("outset result: ", result, pltk.plprintset(result))
+      let resultText = pltk.plprintset(result)
+      $("#output").val("Cn(".concat(resultText,")"))
+    } else {
+      let result = outsetfunction(Aval,Nval, throughput)
+      console.log("outset result: ", result, pltk.plprintset(result))
+      let resultText = pltk.plprintset(result)
+      $("#output").val("Cn(".concat(resultText,")"))
+    }
+    
     //console.log("consequence:", pltk.consequence(result, xval))
     //console.log("cval", pltk.plprintset(Cval))
     /*let result2 = iol.maxFamily(iol.out2set, Nval, Aval, Cval)
