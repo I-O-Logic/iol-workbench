@@ -321,7 +321,9 @@ iol = new function() { const lib = this;
   }
   
   lib.skepticalNetOutput = function(NN) {
-    return semanticalInterreduce(_.reduce(NN, lib.semanticalIntersection))
+    const N0 = _.map(NN, N => pltk.mkConjs(N))
+    return semanticalInterreduce([pltk.mkDisjs(N0)])
+    //return semanticalInterreduce(_.reduce(NN, lib.semanticalIntersection))
   }
   
   /////////////////////
@@ -620,8 +622,9 @@ $(document).ready(function() {
   
     if (constraints) {
       let outFamily = iol.outFamily(outsetfunction,Nval,Aval,Cval, throughput)
+      console.log("outFamily: ", _.map(outFamily, pltk.plprintset))
       let result = netOutput(outFamily)
-      console.log("outset result: ", result, pltk.plprintset(result))
+      console.log("netOutput: ", result, pltk.plprintset(result))
       let resultText = pltk.plprintset(result)
       $("#output").val("Cn(".concat(resultText,")"))
     } else {
