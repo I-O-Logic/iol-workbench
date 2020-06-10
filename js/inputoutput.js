@@ -316,14 +316,70 @@ iol = new function() { const lib = this;
     return _.map(NN, x => out(A, x, throughput))
   }
   
-  lib.credolousNetOutput = function(NN) {
-    return semanticalInterreduce(_.unionWith(...NN, _.isEqual))
+  lib.credolousNetOutput = function(outFamily) {
+    return semanticalInterreduce(_.unionWith(...outFamily, _.isEqual))
   }
   
-  lib.skepticalNetOutput = function(NN) {
-    const N0 = _.map(NN, N => pltk.mkConjs(N))
+  lib.skepticalNetOutput = function(outFamily) {
+    const N0 = _.map(outFamily, N => pltk.mkConjs(N))
     return semanticalInterreduce([pltk.mkDisjs(N0)])
     //return semanticalInterreduce(_.reduce(NN, lib.semanticalIntersection))
+  }
+  
+  lib.prefFamily = function(maxFamily, N, lifting) {
+    const preference = makeIndexBasedPreference(N)
+    const liftedPreference = lifting(preference)
+    const prefFamily = getMaximals(maxFamily, liftedPreference)
+    return prefFamily
+  }
+  
+  const getMaximals = function(set, pref) {
+    let result = []
+    _.forEach(set, function(elem) {
+      let rest = _.without(set,elem)
+      if (!_.some(rest, e => pref(e,elem))) {
+        result.push(elem)
+      }
+    });
+    return result
+  }
+  
+  const makeIndexBasedPreference = function(N) {
+    /* returns: true if a is at least as strong as b,
+                false otherwise. */
+    return function(a,b) {
+      const aIdx = _.findIndex(N, n => _.isEqual(n,a))
+      const bIdx = _.findIndex(N, n => _.isEqual(n, b))
+      if (aIdx == -1 || bIdx == -1) {
+        return false
+      } else {
+        return bIdx - aIdx >= 0
+      }
+    }
+  }
+  
+  const makeStrictPreference = function(pref) {
+    return function(a,b) {
+      if (pref(a,b)) {
+        return !pref(b,a)
+      } else {
+        return false
+      }
+    }
+  }
+  
+  lib.brasslifting = function(pref) {
+    return function(A,B) {
+      const diff1 = _.without(B, ...A)
+      const diff2 = _.without(A, ...B)
+      return _.every(diff1, n => _.some(diff2, m => pref(m,n)))
+    }
+  }
+  
+  lib.fafalifting = function(pref) {
+    return function(A,B) {
+      return _.every(A, n => _.every(B, m => pref(n,m)))
+    }
   }
   
   /////////////////////
@@ -463,7 +519,8 @@ outsetfunction = iol.out1set
 throughput = false
 constraints = false
 netOutput = null
-preference = null
+preferred = false
+lifting = null
 const negativeAnswer = "No, the formula x is not in the output set."
 const positiveAnswer = "Yes, the formula x is in the output set."
 
@@ -543,6 +600,11 @@ $(document).ready(function() {
       constraints = true
       $('#radio-net-credulous').prop("disabled", false);
       $('#radio-net-skeptical').prop("disabled", false);
+      $('#checkbox-preferred-output').prop("disabled", false);
+      if ($('#checkbox-preferred-output').prop("checked")) {
+        $('#radio-preference-lifting-brass').prop("disabled", false);
+        $('#radio-preference-lifting-fafa').prop("disabled", false);
+      }
       if (netOutput == null) {
         $('#radio-net-credulous').click()
       }
@@ -552,6 +614,9 @@ $(document).ready(function() {
       constraints = false
       $('#radio-net-credulous').prop("disabled", true);
       $('#radio-net-skeptical').prop("disabled", true);
+      $('#checkbox-preferred-output').prop("disabled", true);
+      $('#radio-preference-lifting-brass').prop("disabled", true);
+      $('#radio-preference-lifting-fafa').prop("disabled", true);
       $('#constraints').prop("disabled", true);
       $('#copy-constraints').prop("disabled", true);
     }
@@ -576,13 +641,35 @@ $(document).ready(function() {
         // should not happen
     }
   });
+  $('#checkbox-preferred-output').change(function() {
+    if (this.checked) {
+      preferred = true;
+      $('#radio-preference-lifting-brass').prop("disabled", false);
+      $('#radio-preference-lifting-fafa').prop("disabled", false);
+      if (lifting == null) {
+        $('#radio-preference-lifting-brass').click()
+      }
+    } else {
+      preferred = false;
+      $('#radio-preference-lifting-brass').prop("disabled", true);
+      $('#radio-preference-lifting-fafa').prop("disabled", true);
+    }
+  });
+  $('input[type=radio][name=io-preference-lifting]').change(function() {
+    switch (this.value) {
+      case "lifting-brass": lifting = iol.brasslifting; break;
+      case "lifting-fafa": lifting = iol.fafalifting; break;
+      default: 
+        alert("This should not happen; tell Alex :-)")
+        // should not happen
+    }
+  });
   $("#copy-constraints").click(function(){
     $('#constraints').val($('#input').val())
   });
   
   
-  // iol functionality
-  $("#outputButton").click(function(){
+  const calculateOutput = function() {
     const Atext = $("#input").val()
     const Ntext = $("#norms").val()
     const Ctext = $('#constraints').val()
@@ -621,73 +708,42 @@ $(document).ready(function() {
     }
   
     if (constraints) {
-      let outFamily = iol.outFamily(outsetfunction,Nval,Aval,Cval, throughput)
-      console.log("outFamily: ", _.map(outFamily, pltk.plprintset))
+      const maxFamily = iol.maxFamily(outsetfunction,Nval,Aval,Cval,throughput)
+      console.log("maxFamily: ", _.map(maxFamily, mf => _.map(mf, iol.printnorm)), maxFamily)
+      let outFamily = null
+      if (preferred) {
+        const prefFamily = iol.prefFamily(maxFamily, Nval, lifting) 
+        console.log("prefFamily: ", _.map(prefFamily, pf => _.map(pf, iol.printnorm)), prefFamily)
+        outFamily = iol.outFamily0(outsetfunction,prefFamily,Aval,throughput)
+      } else {
+        outFamily = iol.outFamily0(outsetfunction,maxFamily,Aval,throughput)
+      }
+      console.log("outFamily: ", _.map(outFamily, pltk.plprintset), outFamily)
       let result = netOutput(outFamily)
-      console.log("netOutput: ", result, pltk.plprintset(result))
-      let resultText = pltk.plprintset(result)
-      $("#output").val("Cn(".concat(resultText,")"))
+      console.log("netOutput: ", pltk.plprintset(result), result)
+      return result
     } else {
       let result = outsetfunction(Aval,Nval, throughput)
-      console.log("outset result: ", result, pltk.plprintset(result))
-      let resultText = pltk.plprintset(result)
-      $("#output").val("Cn(".concat(resultText,")"))
+      console.log("output: ", pltk.plprintset(result), result)
+      return result
     }
-    
-    //console.log("consequence:", pltk.consequence(result, xval))
-    //console.log("cval", pltk.plprintset(Cval))
-    /*let result2 = iol.maxFamily(iol.out2set, Nval, Aval, Cval)
-    console.log("result2", result2)
-    let result3 = iol.outFamily0(iol.out2set, result2, Aval)
-    console.log("result3", result3)
-    let result4 = netOutput(result3)
-    console.log("result4", result4, pltk.plprintset(result4))*/
+  }
+  
+  // iol functionality
+  $("#outputButton").click(function(){
+    $("#output").removeClass("is-invalid")
+    const output = calculateOutput()
+    const resultText = pltk.plprintset(output)
+    $("#output").val("Cn(".concat(resultText,")"))
   });
   
   $("#checkButton").click(function(){
-    //$('#feedbackno').hide()
-    //$('#feedbackyes').hide()
     $('#response').removeClass("alert-success")
     $('#response').removeClass("alert-warning")
     $('#response').css('visibility', 'collapse');
 
-    const Atext = $("#input").val()
-    const Ntext = $("#norms").val()
-    const Ctext = $('#constraints').val()
     const xtext = $("#output").val()
-    
-    let Aval = []
-    let Nval = []
-    let Cval = []
     let xval = null
-    
-    if (Atext.length > 0) {
-      try {
-        Aval = Atext.split(',').map(plparse.read)
-      } catch(err) {
-        $('#input').addClass("is-invalid")
-        return
-      }
-    }
-    
-    if (Ntext.length > 0) {
-      try {
-        Nval = Ntext.trim().split('\n').filter(y => y.length > 0).map(x => x.trim().slice(1,-1).split(',').map(plparse.read))
-        N = Nval
-      } catch(err) {
-        $('#norms').addClass("is-invalid")
-        return
-      }
-    }
-    
-    if (Ctext.length > 0) {
-      try {
-        Cval = Ctext.split(',').map(plparse.read)
-      } catch(err) {
-        $('#constraints').addClass("is-invalid")
-        return
-      }
-    }
     
     try {
       xval = plparse.read(xtext)
@@ -699,20 +755,8 @@ $(document).ready(function() {
       $('#output').addClass("is-invalid")
       return
     }
-    
-    /*
-    let out = null
-    if ($('#radio-out1').prop("checked")) {
-      out = iol.out1
-    } else if ($('#radio-out2').prop("checked")) {
-      out = iol.out2
-    } else if ($('#radio-out3').prop("checked")) {
-      out = iol.out3
-    } else if ($('#radio-out4').prop("checked")) {
-      out = iol.out4
-    }*/
-    
-    let result = outfunction(Aval,Nval,xval, throughput)
+    const output = calculateOutput()
+    const result = pltk.consequence(output,xval)
     if (result != null) {
       if (result) {
         $('#response').addClass("alert-success")
