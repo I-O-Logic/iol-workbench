@@ -535,6 +535,13 @@ $(document).ready(function() {
     //$("#norms").val('(a,x)\n(b,(x | y) & (x | ~y))')
     $("#constraints").val('')
     $("#output").val('x & y')
+    $('#radio-out1').click()
+    if ($('#checkbox-constrained').prop("checked", true)) {
+      $('#checkbox-constrained').click()
+    }
+    if ($('#checkbox-preferred-output').prop("checked", true)) {
+      $('#checkbox-preferred-output').click()
+    }
   });
   $("#example2button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
@@ -542,6 +549,13 @@ $(document).ready(function() {
     $("#norms").val('(a,x)\n(b,x)')
     $("#constraints").val('')
     $("#output").val('x')
+    $('#radio-out2').click()
+    if ($('#checkbox-constrained').prop("checked", true)) {
+      $('#checkbox-constrained').click()
+    }
+    if ($('#checkbox-preferred-output').prop("checked", true)) {
+      $('#checkbox-preferred-output').click()
+    }
   });
   $("#example3button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
@@ -549,6 +563,13 @@ $(document).ready(function() {
     $("#norms").val('(a,x)\n(b,y)\n(x&y,z)')
     $("#constraints").val('')
     $("#output").val('z')
+    $('#radio-out3').click()
+    if ($('#checkbox-constrained').prop("checked", true)) {
+      $('#checkbox-constrained').click()
+    }
+    if ($('#checkbox-preferred-output').prop("checked", true)) {
+      $('#checkbox-preferred-output').click()
+    }
   });
   $("#example4button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
@@ -556,6 +577,13 @@ $(document).ready(function() {
     $("#norms").val('(T,helping)\n(helping,telling)\n(~helping,~telling)')
     $("#constraints").val('')
     $("#output").val('')
+    $('#radio-out3').click()
+    if ($('#checkbox-constrained').prop("checked", false)) {
+      $('#checkbox-constrained').click()
+    }
+    if ($('#checkbox-preferred-output').prop("checked", true)) {
+      $('#checkbox-preferred-output').click()
+    }
   });
   $("#example5button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
@@ -563,6 +591,13 @@ $(document).ready(function() {
     $("#norms").val('(T,~killing)\n(killing,killing & killingGently)')
     $("#constraints").val('')
     $("#output").val('')
+    $('#radio-out1').click()
+    if ($('#checkbox-constrained').prop("checked", false)) {
+      $('#checkbox-constrained').click()
+    }
+    if ($('#checkbox-preferred-output').prop("checked", true)) {
+      $('#checkbox-preferred-output').click()
+    }
   });
   $("#example6button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
@@ -570,8 +605,55 @@ $(document).ready(function() {
     $("#norms").val('(T,armyService | alternativeService)\n(T,~ armyService)')
     $("#constraints").val('')
     $("#output").val('')
+    $('#radio-out1').click()
+    if ($('#checkbox-constrained').prop("checked", false)) {
+      $('#checkbox-constrained').click()
+    }
+    if ($('#checkbox-preferred-output').prop("checked", true)) {
+      $('#checkbox-preferred-output').click()
+    }
   });
-
+  $("#example7button").click(function(){
+    $("input[type=text]").removeClass("is-invalid")
+    $("#input").val('')
+    $("#norms").val('(T,cityA)\n(T,cityB)\n(T,cityC)')
+    $("#constraints").val('(~cityA|(~cityB|~cityC)),(~cityA|~cityB)')
+    $("#output").val('')
+    if ($('#checkbox-constrained').prop("checked", false)) {
+      $('#checkbox-constrained').click()
+    }
+    if ($('#checkbox-preferred-output').prop("checked", false)) {
+      $('#checkbox-preferred-output').click()
+    }
+  });
+  $("#example8button").click(function(){
+    $("input[type=text]").removeClass("is-invalid")
+    $("#input").val('dataset')
+    $("#norms").val('(chemo,keepWBCcount)\n(dataset,chemo)\n(dataset,~chemo)')
+    $("#constraints").val('dataset')
+    $("#output").val('')
+    $('#radio-out3').click()
+    if ($('#checkbox-constrained').prop("checked", false)) {
+      $('#checkbox-constrained').click()
+    }
+    if ($('#checkbox-preferred-output').prop("checked", false)) {
+      $('#checkbox-preferred-output').click()
+    }
+  });
+  $("#example9button").click(function(){
+    $("input[type=text]").removeClass("is-invalid")
+    $("#input").val('dataset')
+    $("#norms").val('(heatingOn,~windowOpen)\n(T,windowOpen)\n(T,heatingOn)')
+    $("#constraints").val('')
+    $("#output").val('')
+    $('#radio-out3').click()
+    if ($('#checkbox-constrained').prop("checked", false)) {
+      $('#checkbox-constrained').click()
+    }
+    if ($('#checkbox-preferred-output').prop("checked", false)) {
+      $('#checkbox-preferred-output').click()
+    }
+  });
 
   // Parse error handling
   $("#input").on('input', function(e) {
