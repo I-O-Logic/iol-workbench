@@ -6,7 +6,8 @@ as a class of formal systems for norm-based deontic reasoning. Intuitively,
 they formalize the question what obligations can be detached (the output) from a given
 set of conditional norms and a specific situation (the input). It differs from
 other deontic logics in the sense that the norms themselves are not part of the
-object logic and hence do not carry truth values.
+object logic and hence do not carry truth values. Constrained I/O logic [2]
+addresses contrary-to-duty situations and other dilemmas.
 
 ## The Tool
 
@@ -56,14 +57,21 @@ information for A, N and x and press "check given output".
 
 - [X] Unconstrained I/O logic (since 0.1)
 - [X] Throughput (since 0.2)
-- [ ] Constrained I/O logic
-- [ ] Calculation of finite basis of output set
-- [ ] Norm preferences
+- [X] Constrained I/O logic (since 0.4)
+- [X] Calculation of finite basis of output set (since 0.5)
+- [X] Norm preferences (since 0.6)
 
-Current version: 0.3
+Current version: 0.6
 
-Last update: Some bug fixes and beautification of graphical interface.
+Last update: 
+
+## License
+
+The I/O Logic Workbench is licensed using the GNU GPL license (see LICENSE file),
+and uses third party libraries that are distributed under their own terms (see LICENSE-3RD-PARTIES file).
 
 ## References
 
 [1] Makinson, D., van der Torre, L.W.N.: Input/Output Logics. J. Philosophical Logic 29(4), 383–408 (2000). https://doi.org/10.1023/A:1004748624537
+[2] Makinson, D., van der Torre, L.W.N.: Constraints for Input/Output Logics. J. Philos. Log. 30(2): 155-185 (2001). https://doi.org/10.1023/A:1017599526096
+
