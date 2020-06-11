@@ -1,3 +1,21 @@
+/*
+  I/O Logic Workbench: Automated Reasoner for I/O Logics
+  Copyright (C) 2020 Alexander Steen <alexander.steen@uni.lu>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 iol = new function() { const lib = this;
 
   /////////////////////
@@ -575,7 +593,7 @@ $(document).ready(function() {
     $("input[type=text]").removeClass("is-invalid")
     $("#input").val('~helping')
     $("#norms").val('(T,helping)\n(helping,telling)\n(~helping,~telling)')
-    $("#constraints").val('')
+    $("#constraints").val('~helping')
     $("#output").val('')
     $('#radio-out3').click()
     if ($('#checkbox-constrained').prop("checked", false)) {
@@ -589,7 +607,7 @@ $(document).ready(function() {
     $("input[type=text]").removeClass("is-invalid")
     $("#input").val('killing')
     $("#norms").val('(T,~killing)\n(killing,killing & killingGently)')
-    $("#constraints").val('')
+    $("#constraints").val('killing')
     $("#output").val('')
     $('#radio-out1').click()
     if ($('#checkbox-constrained').prop("checked", false)) {
@@ -642,7 +660,7 @@ $(document).ready(function() {
   });
   $("#example9button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
-    $("#input").val('dataset')
+    $("#input").val('')
     $("#norms").val('(heatingOn,~windowOpen)\n(T,windowOpen)\n(T,heatingOn)')
     $("#constraints").val('')
     $("#output").val('')
