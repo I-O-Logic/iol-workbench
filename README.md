@@ -30,18 +30,18 @@ from here, unpack it and open the `index.html` in any reasonably modern browser 
 
 The Workbench looks like this (depending a bit on your browser):
 
-![The I/O Logic Workbench](/doc/iolw.png)
+![The I/O Logic Workbench](/img/iolw.png)
 
 The graphical user interface consists of two main panels: The configuration panel (on the left)
 and the main panel (on the right):
 
-<img alt="The configuration panel" src="/doc/left.png" width="300">
+<img alt="The configuration panel" src="/img/left.png" width="300">
 
 In the left menu panel, a user can choose which out operation should be used for the reasoning process.
 Please note that there are already some disabled configuration settings that are not yet supported.
 Additionally, some example scenarios can be loaded using the respective buttons at the top left.
 
-![The main panel](/doc/right.png)
+![The main panel](/img/right.png)
 
 On the right side, the input A, the set of norms N and a prospective output
 x can be entered. The input language is an ASCII representation of propo-
