@@ -39,9 +39,8 @@
     <div class="container">
       <div class="row">
         <div class="col-sm text-center">
-          <h1 class="h2" style="font-variant:small-caps">I/O Logics Workbench
-          <div class="float-right"><a href="index.html"><span style="font-size:medium">back</span></a></div>
-          </h1>
+          <div class="float-right h2"><a href="index.html"><span style="font-size:medium;font-variant:small-caps">Back</span></a></div>
+          <h1 class="h2" style="font-variant:small-caps">I/O Logics Workbench</h1>
         </div>
       </div>  
       <div class="row">
@@ -62,10 +61,6 @@
             The I/O Logic Workbench is aimed at providing a browser-based automated reasoning system for various I/O logics.
             In short, the system allows you to input a set of norms and an input (the description of the current situation),
             and provides automated means for inferring whether a certain formula can be derived as an obligation from this.
-          </p><p>
-            It is implemented as a client-side application in JavaScript, so that there is no
-            need for any backend server infrastructure. Hence, it runs in every reasonably current browser,
-            ready-to-use for conducting own experiments without any major installation or set-up.
           </p>
           <h2 class="h4">Usage</h2>
           <p>
@@ -74,29 +69,53 @@
           </p>
           <p>
             In the left menu panel, a user can choose which out operation should be used for the reasoning process.
-            Please note that there are already some disabled configuration settings that are not yet supported.
-            Additionally, some example scenarios can be loaded using the respective buttons at the top left.
+            Furthermore, a selection of semantic parameters can be accessed for the output operations.
+            Fially, some example scenarios can be loaded using the respective buttons at the top left.
           </p>
           <p> 
-            On the right side, the input A, the set of norms N and a prospective output
-            x can be entered. The input language is an ASCII representation of propo-
-            sitional logic, where |, & and  ̃  denote disjunction, conjunction and negation,
-            respectively. The input A is a comma separated list of formulas, whereas the
-            set of norms N is, as usual, represented as a set of pairs. Every norm is entered
-            as a separate line in the text area. 
+            On the right side, the input <code>A</code>, the set of norms <code>N</code> and a prospective output
+            <code>x</code> can be entered. The input language is an ASCII representation of propositional logic,
+            where <code>|</code>, <code>&</code> and <code>~</code> denote disjunction, conjunction and negation,
+            respectively. There are no binding preferences between conjunction and disjunction,
+            so they have to be properly parenthesised. Atomic propositions are any sequence of letters,
+            e.g. <code>a</code>, <code>abc</code> or <code>veryLongNameForMyAtomicProposition</code>.
+            The literals <code>T</code> and <code>F</code> are interpreted as truth and falsehood, respectively.
+            An example formula is <code>x & (c | d) & ~e</code>.
           </p><p>
+            The input <code>A</code> is a comma separated list of formulas (possibly empty), whereas the
+            set of norms <code>N</code> is, as usual, represented as a set of pairs. Every norm is entered
+            as a separate line in the text area. The prospective output <code>x</code> is a simple formula.
+          </p>
+          <p>
+            <b>Use case 1:</b> <em>Checking a prospective output</em>.
             To check whether a formula is in the output set of the selected out operator, enter the respective
-            information for A, N and x and press "check given output".
+            information for <code>A</code>, <code>N</code> and <code>x</code> and press "check given output".
+          </p>
+          <p>
+            <b>Use case 2:</b> <em>Generating the output set</em>.
+            To let the tool generate the complete output set, enter the respective
+            information for <code>A</code> and <code>N</code> (<code>x</code> is not required here)
+            and press "generate output set". The (infinite) output set is represented by its finite base.
+            Example: <code>Cn(a,b,c)</code> represents the set of all (classical) consequences of the set
+            <code>{a,b,c}</code>, including, e.g., <code>a</code>, <code>a & b</code> and <code>a | (x & y)</code>.
+          </p>
+          <h2 class="h4">Development/Version</h2>
+          <p>
+            The source code of the I/O Logic Workbench is open-source and freely available at
+            <a href="https://github.com/I-O-Logic/iol-workbench">GitHub</a>.
+            It is implemented as a client-side application in JavaScript, so that there is no
+            need for any backend server infrastructure. Hence, it runs in every reasonably current browser,
+            ready-to-use for conducting own experiments without any major installation or set-up.
+          </p>
+          <p>
+            Current version: 0.6, see the <a href="https://github.com/I-O-Logic/iol-workbench">GitHub</a>
+            project for more details. 
           </p>
           <h2 class="h4">License</h2>
           <p>
             The I/O Logic Workbench is licensed using the GNU GPL license (see <a href="LICENSE">LICENSE</a> file),
             and uses third party libraries that are distributed under their own terms
             (see <a href="LICENSE-3RD-PARTIES">LICENSE-3RD-PARTIES</a> file).
-          </p>
-          <p>
-            The source code of the I/O Logic Workbench is open-source and freely available at
-            <a href="https://github.com/I-O-Logic/iol-workbench">GitHub</a>.
           </p>
           <h2 class="h4">References</h2>
           <dl>
