@@ -29,6 +29,7 @@
     <meta name="keywords" content="I/O Logic, Automated Reasoning, Deontic Logic, Automated Theorem Proving, Logical Reasoning, Input/Output logics, Logic Workbench">
     <meta name="description" content="An automated reasoning system for Input/Output logics.">
     <meta name="author" content="Alexander Steen">
+    <meta name="google-site-verification" content="93SdRdvJRhOdwO5Yx9VsFhpJGsolLNoOTL9bNmIN24A" />
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="lib/jquery-3.4.1.slim.min.js" ></script>
@@ -39,11 +40,11 @@
     <div class="container">
       <div class="row">
         <div class="col-sm text-center">
-          <h1 class="h2" style="font-variant:small-caps">
-            I/O Logics Workbench
-            <span class="text-muted" style="font-size:medium">0.6</span>
-            <div class="float-right"><a href="about.html"><span style="font-size:medium">about</span></a></div>
-          </h1>
+          <div class="float-right h2 ml-0">
+            <span class="text-muted mr-2" style="font-size:small">Version 0.6</span>
+            <a href="about.html"><span style="font-size:medium;font-variant:small-caps">About</span></a>
+          </div>
+          <h1 class="h2" style="font-variant:small-caps">I/O Logics Workbench</h1>
         </div>
       </div>
       <div class="row">
@@ -199,7 +200,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="output"><b>Output</b> <span class="text-muted small">(required for output checking, automatically populated when generating the output set)</span></label>
+            <label for="output"><b>Output/Output set</b> <span class="text-muted small">(required for output checking, automatically populated when generating the output set)</span></label>
             <div class="input-group">
               <div class="input-group-prepend">
                 <div class="input-group-text">X</div>
@@ -212,7 +213,7 @@
           </div>
           <div class="d-flex justify-content-around">
             <button id="checkButton" type="button" class="btn btn-primary flex-fill mr-1">Check given output</button>
-            <button id="outputButton" type="button" class="btn btn-primary flex-fill cursor-na">Generate output set</button>
+            <button id="outputButton" type="button" class="btn btn-secondary flex-fill cursor-na">Generate output set</button>
           </div>
         </div>
       </div>
