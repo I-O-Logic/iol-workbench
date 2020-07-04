@@ -556,7 +556,7 @@ iol = new function() { const lib = this;
 
 /* IOLW state */
 const iolw = {
-  'outfunction': null,
+  'outfunction': iol.out1set,
   'throughput': false,
   'constaints': false,
   'netOutput': null,
