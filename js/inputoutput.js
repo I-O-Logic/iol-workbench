@@ -79,6 +79,8 @@ iol = new function() { const lib = this;
       let basicOut = lib.out2set(A,N)
       let triggered = basicOut.concat(lib.out3set(A.concat(basicOut), N))
       
+      // Loop: Terminate if the previous output implies the new one (then, nothing new has been detached)
+      // The inverse (i.e., the new output implies the old one) holds unconditionally
       while (!pltk.consequence(lastOut, pltk.mkConjs(triggered))) {
         lastOut = triggered
         basicOut = triggered.concat(lib.out2set(lastOut,N))
