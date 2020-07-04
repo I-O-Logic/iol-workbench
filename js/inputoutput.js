@@ -17,217 +17,14 @@
 */
 
 iol = new function() { const lib = this;
-
-  /////////////////////
-  // in-outset operations
-  /////////////////////
-  lib.out1 = function(A, N, x, throughput) {
-    const N2 = getDirectlyTriggeredNorms(A,N)
-    const M = heads(N2)
-    if (_.isUndefined(throughput) || throughput === false) {
-      // without throughput
-      return pltk.consequence(M, x)
-    } else {
-      // with throughput
-      return pltk.consequence(M.concat(A), x)
-    }
-  }
-  
-  lib.out2 = function(A, N, x, throughput) {
-    if (_.isUndefined(throughput) || throughput === false) {
-      // without throughput
-      const cnfN = _.map(N, function(n) { return [pltk.conjs(pltk.cnf(body(n))), head(n)] })
-      const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
-      return _.every(dnf, function(clause) {
-        const triggeredNorms = getBasicTriggeredNorms([clause],cnfN )
-        return pltk.consequence(heads(triggeredNorms), x)
-      });
-    } else {
-      // with throughput
-      const m = materialization(N)
-      return pltk.consequence(m.concat(A), x)
-    }
-  }
-  
-  lib.out3 = function(A, N, x, throughput) {
-    // Select trigger function: Include A if with throughput
-    let outputTriggered = function() { return pltk.consequence(heads(N2),x) }
-    if (throughput === true) {
-      outputTriggered = function() { return pltk.consequence(heads(N2).concat(A),x) }
-    }
-    // main function
-    let A2 = A.slice()
-    let N2 = getDirectlyTriggeredNorms(A,N)
-    let NN = _.without(N, ...N2)
-    while (!outputTriggered()) {
-      A2 = A2.concat(heads(N2))
-      let M = getDirectlyTriggeredNorms(A2, NN)
-      if (_.isEmpty(M)) {
-        return false
-      } else {
-        N2 = N2.concat(M)
-        NN = _.without(NN, ...M)
-      }
-    }
-    return true
-  }
-  
-  lib.out4 = function(A, N, x, throughput) {
-    if (_.isUndefined(throughput) || throughput === false) {
-      // without throughput
-      const cnfN = _.map(N, function(n) { return [pltk.conjs(pltk.cnf(body(n))), head(n)] })
-      const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
-      return _.every(dnf, function(clause) {
-        const triggeredNorms = getBasicTriggeredNorms([clause],cnfN )
-        let A2 = [clause]
-        const N3 = _.map(N2, function(n) {
-          return [_.reject(body(n), x => pltk.consequence([clause], x)),head(n)]
-        });
-        //console.log("N3", N3)
-        const N4 = _.filter(N3, n => _.isEmpty(body(n)))
-        const N5 = _.without(N3, ...N4)
-        const N6 = _.filter(N5, function(n) {
-            console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
-            const compat = lib.getCompatibleNorms(N5,n)
-            console.log("compat of this: ", _.map(compat, lib.printnorm))
-            const compatBodies = _.map(compat, m => pltk.mkConjs(body(m)))
-            console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
-            const together = pltk.mkDisjs(compatBodies)
-            console.log("together: ", pltk.plprint(together))
-            return pltk.tautology(together)
-          })
-        const NN = _.without(N5, ...N6)
-        if (pltk.consequence(heads(N4).concat(heads(N6)), x)) {
-          return true
-        } else {
-          A2 = A2.concat(heads(N4).concat(heads(N6)))
-          A3 = pltk.disjs(pltk.dnf(pltk.mkConjs(A2)))
-          return _.every(A3, function(y2) {
-            const M = _.map(NN, function(n) {
-              return [_.reject(body(n), x => pltk.consequence([y2], x)),head(n)]
-            });
-            const M2 = _.filter(M, n => _.isEmpty(body(n)))
-        const M3 = _.without(M, ...M2)
-        const M4 = _.filter(M3, function(n) {
-            console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
-            const compat = lib.getCompatibleNorms(M3,n)
-            console.log("compat of this: ", _.map(compat, lib.printnorm))
-            const compatBodies = _.map(compat, m => pltk.mkConjs(body(m)))
-            console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
-            const together = pltk.mkDisjs(compatBodies)
-            console.log("together: ", pltk.plprint(together))
-            return pltk.tautology(together)
-          })
-           const together = M2.concat(M4)
-           if (together.length == 0) return false
-           else {
-            return lib.out4([y2],N,x)
-           }
-          })
-        }
-      })
-    } else {
-      // with throughput: same as out2 with throughput
-      return lib.out2(A,N,x,throughput)
-    }
-  }
-  
-  /* This is a prototypical implementation. This can be made much more elegant: TODO */
-  lib.out4Old2 = function(A, N, x, throughput) {
-    if (_.isUndefined(throughput) || throughput === false) {
-      // without throughput
-      const N2 = _.map(N, function(n) { return [pltk.conjs(pltk.cnf(body(n))), head(n)] })
-      const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
-      return _.every(dnf, function(clause) {
-        let A2 = [clause]
-        const N3 = _.map(N2, function(n) {
-          return [_.reject(body(n), x => pltk.consequence([clause], x)),head(n)]
-        });
-        //console.log("N3", N3)
-        const N4 = _.filter(N3, n => _.isEmpty(body(n)))
-        const N5 = _.without(N3, ...N4)
-        const N6 = _.filter(N5, function(n) {
-            console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
-            const compat = lib.getCompatibleNorms(N5,n)
-            console.log("compat of this: ", _.map(compat, lib.printnorm))
-            const compatBodies = _.map(compat, m => pltk.mkConjs(body(m)))
-            console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
-            const together = pltk.mkDisjs(compatBodies)
-            console.log("together: ", pltk.plprint(together))
-            return pltk.tautology(together)
-          })
-        const NN = _.without(N5, ...N6)
-        if (pltk.consequence(heads(N4).concat(heads(N6)), x)) {
-          return true
-        } else {
-          A2 = A2.concat(heads(N4).concat(heads(N6)))
-          A3 = pltk.disjs(pltk.dnf(pltk.mkConjs(A2)))
-          return _.every(A3, function(y2) {
-            const M = _.map(NN, function(n) {
-              return [_.reject(body(n), x => pltk.consequence([y2], x)),head(n)]
-            });
-            const M2 = _.filter(M, n => _.isEmpty(body(n)))
-        const M3 = _.without(M, ...M2)
-        const M4 = _.filter(M3, function(n) {
-            console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
-            const compat = lib.getCompatibleNorms(M3,n)
-            console.log("compat of this: ", _.map(compat, lib.printnorm))
-            const compatBodies = _.map(compat, m => pltk.mkConjs(body(m)))
-            console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
-            const together = pltk.mkDisjs(compatBodies)
-            console.log("together: ", pltk.plprint(together))
-            return pltk.tautology(together)
-          })
-           const together = M2.concat(M4)
-           if (together.length == 0) return false
-           else {
-            return lib.out4([y2],N,x)
-           }
-          })
-        }
-      })
-    } else {
-      // with throughput: same as out2 with throughput
-      return lib.out2(A,N,x,throughput)
-    }
-  }
-  
-  lib.out4Old = function(A, N, x, throughput) {
-    if (_.isUndefined(throughput) || throughput === false) {
-      // without throughput
-      const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
-      return dnf.every(function(y) {
-        let A3 = [y]
-        let N2 = getDirectlyTriggeredNorms(A3,N)
-        let NN = _.without(N, ...N2)
-        if (!pltk.consequence(heads(N2),x)) {
-          A3 = A3.concat(heads(N2))
-          A4 = pltk.disjs(pltk.dnf(pltk.mkConjs(A3)))
-          return A4.every(function(y2) {
-            let M = NN.filter(n => pltk.consequence([y2], n[0]))
-            if (M.length == 0) return false
-            else {
-              return lib.out4([y2],N,x)
-            }
-          })
-        } else return true
-      })
-    } else {
-      // with throughput: same as out2 with throughput
-      return lib.out2(A,N,x,throughput)
-    }
-  }
-  
-
   
   /////////////////////
   // outset operations
   /////////////////////
   
-  
   lib.out1set = function(A, N, throughput) {
-    const N2 = getDirectlyTriggeredNorms(A,N)
-    const M = heads(N2)
+    const triggered = getDirectlyTriggeredNorms(A,N)
+    const M = heads(triggered)
     if (_.isUndefined(throughput) || throughput === false) {
       // without throughput
       return semanticalInterreduce(M)
@@ -240,19 +37,15 @@ iol = new function() { const lib = this;
   lib.out2set = function(A, N, throughput) {
     if (_.isUndefined(throughput) || throughput === false) {
       // without throughput
-      const cnfN = _.map(N, function(n) { return [pltk.conjs(pltk.cnf(body(n))), head(n)] })
-      const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
-      const triggeredEach = _.map(dnf, clause => heads(getBasicTriggeredNorms([clause],cnfN)))
-      const result = _.reduce(triggeredEach, lib.semanticalIntersection)
-      console.log(result, pltk.plprintset(result))
-      // do new stuff
-      const triggered2 = getBasicTriggeredNorms2(A, N)
-      console.log(triggered2)
-      const result2 = heads(triggered2)
-      console.log(result2, pltk.plprintset(result2))
-      const i = _.differenceBy(result, result2, _.isEqual)
-      console.log("difference", i)
-      if (!_.isEmpty(i)) throw new Error("asd")
+      /* old implementation, TODO: Remove */
+      //const cnfN = _.map(N, function(n) { return [pltk.conjs(pltk.cnf(body(n))), head(n)] })
+      //const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
+      //const triggeredEach = _.map(dnf, clause => heads(getBasicTriggeredNorms([clause],cnfN)))
+      //const result = _.reduce(triggeredEach, lib.semanticalIntersection)
+      //console.log(result, pltk.plprintset(result))
+      /* old implementation END */
+      const triggered = getBasicTriggeredNorms(A, N)
+      const result = heads(triggered)
       return semanticalInterreduce(result)
     } else {
       // with throughput
@@ -295,7 +88,7 @@ iol = new function() { const lib = this;
       return semanticalInterreduce(lastOut)
     } else {
       // with throughput
-      return lib.out2set(A,N, throughput)
+      return lib.out2set(A, N, throughput)
     }
   }
   
@@ -307,11 +100,6 @@ iol = new function() { const lib = this;
   lib.maxFamily = function(out,N,A,C,throughput) {
     let NN = [N]
     let result = []
-    
-    //console.log("N", N)
-    //console.log("NN", NN)
-    //console.log("A", A)
-    //console.log("C", C)
        
     while (!(_.isEmpty(NN))) {
       //console.log("####")
@@ -436,7 +224,7 @@ iol = new function() { const lib = this;
     return result
   }
   
-  const canonizeOut = function(M) {
+  /*const canonizeOut = function(M) {
     let Msimp = pltk.simpset(M)
     // console.log(pltk.plprintset(Msimp))
     let together = pltk.mkConjs(Msimp)
@@ -447,10 +235,10 @@ iol = new function() { const lib = this;
     // console.log(cnfSimp, pltk.plprint(cnfSimp))
     let result = pltk.conjs(cnfSimp)
     return result
-  }
+  }*/
   
-  /** Assumes the bodies of N are CNF-normal sets of clauses */
-  const getBasicTriggeredNorms = function(A, N) {
+  /** Assumes the bodies of N are CNF-normal sets of clauses, TODO: Remove */
+  /*const getBasicTriggeredNormsOLD = function(A, N) {
     const updatedN = _.map(N, function(n) {
       return [_.reject(body(n), x => pltk.consequence(A, x)),head(n)]
     });
@@ -471,9 +259,9 @@ iol = new function() { const lib = this;
       return pltk.tautology(together)
     })
     return directlyTriggered.concat(basicTriggered)
-  }
+  }*/
   
-  const getBasicTriggeredNorms2 = function(A, N) {
+  const getBasicTriggeredNorms = function(A, N) {
     return _.filter(N, function(n) {
       //console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
       const compat = lib.getCompatibleNorms(N,n)
@@ -484,24 +272,6 @@ iol = new function() { const lib = this;
       //console.log("together: ", pltk.plprint(together))
       return pltk.consequence(A, together)
     })
-  }
-  
-  lib.partition = function(N) {
-    const N2 = _.reduce(N, function(result, norm) {
-      const h = head(norm);
-      //console.log(h);
-      let idx = _.find(result, function(n) {return _.some(n, x => pltk.equivalent(head(x),h))});
-      //console.log(idx);
-      if (_.isUndefined(idx)) {
-        result.push([norm])
-        //console.log("here")
-      } else {
-        idx.push(norm)
-      }
-      //console.log("result", result)
-      return result;
-    }, []);
-    return N2
   }
   
   /* retrieve norms that have a head that is at least as strong as n */
