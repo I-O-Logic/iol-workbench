@@ -561,8 +561,6 @@ constraints = false
 netOutput = null
 preferred = false
 lifting = null
-const negativeAnswer = "No, the formula x is not in the output set."
-const positiveAnswer = "Yes, the formula x is in the output set."
 
 N = null
 
@@ -886,6 +884,8 @@ $(document).ready(function() {
     $("#output").val("Cn(".concat(resultText,")"))
   });
   
+  const negativeAnswer = function(x) { return "No, the formula " + pltk.plprint(x) + " is not in the output set." }
+  const positiveAnswer = function(x) { return "Yes, the formula " + pltk.plprint(x) + " is in the output set." }
   $("#checkButton").click(function(){
     $('#response').removeClass("alert-success")
     $('#response').removeClass("alert-warning")
@@ -909,10 +909,10 @@ $(document).ready(function() {
     if (result != null) {
       if (result) {
         $('#response').addClass("alert-success")
-        $('#response-text').text(positiveAnswer)
+        $('#response-text').text(positiveAnswer(xval))
       } else {
         $('#response').addClass("alert-warning")
-        $('#response-text').text(negativeAnswer)
+        $('#response-text').text(negativeAnswer(xval))
       }
       $('#response').css('visibility', 'visible');
       window.setTimeout(function() {$('#response').css('visibility', 'collapse');}, 5000);
