@@ -554,13 +554,15 @@ iol = new function() { const lib = this;
   }
 }
 
-outfunction = iol.out1
-outsetfunction = iol.out1set
-throughput = false
-constraints = false
-netOutput = null
-preferred = false
-lifting = null
+/* IOLW state */
+const iolw = {
+  'outfunction': null,
+  'throughput': false,
+  'constaints': false,
+  'netOutput': null,
+  'preferred': false,
+  'lifting': null
+}
 
 N = null
 
@@ -720,10 +722,10 @@ $(document).ready(function() {
   /** Select the right out function */
   $('input[type=radio][name=out]').change(function() {
     switch (this.value) {
-      case "out1": outfunction = iol.out1;outsetfunction = iol.out1set; break;
-      case "out2": outfunction = iol.out2;outsetfunction = iol.out2set; break;
-      case "out3": outfunction = iol.out3;outsetfunction = iol.out3set; break;
-      case "out4": outfunction = iol.out4;outsetfunction = iol.out4set; break;
+      case "out1": iolw.outfunction = iol.out1set; break;
+      case "out2": iolw.outfunction = iol.out2set; break;
+      case "out3": iolw.outfunction = iol.out3set; break;
+      case "out4": iolw.outfunction = iol.out4set; break;
       default: 
         alert("This should not happen; tell Alex :-)")
         // should not happen
@@ -733,16 +735,16 @@ $(document).ready(function() {
   /** Select the throughput setting */
   $('#checkbox-io-throughput').change(function() {
     if (this.checked) {
-      throughput = true
+      iolw.throughput = true
     } else {
-      throughput = false
+      iolw.throughput = false
     }
   })
 
   /** Select the contrained setting */
   $('#checkbox-constrained').change(function() {
     if (this.checked) {
-      constraints = true
+      iolw.constraints = true
       $('#radio-net-credulous').prop("disabled", false);
       $('#radio-net-skeptical').prop("disabled", false);
       $('#checkbox-preferred-output').prop("disabled", false);
@@ -750,13 +752,13 @@ $(document).ready(function() {
         $('#radio-preference-lifting-brass').prop("disabled", false);
         $('#radio-preference-lifting-fafa').prop("disabled", false);
       }
-      if (netOutput == null) {
+      if (iolw.netOutput == null) {
         $('#radio-net-credulous').click()
       }
       $('#constraints').prop("disabled", false);
       $('#copy-constraints').prop("disabled", false);
     } else {
-      constraints = false
+      iolw.constraints = false
       $('#radio-net-credulous').prop("disabled", true);
       $('#radio-net-skeptical').prop("disabled", true);
       $('#checkbox-preferred-output').prop("disabled", true);
@@ -770,8 +772,8 @@ $(document).ready(function() {
   /** Select the net output setting */
   $('input[type=radio][name=io-constrained-net]').change(function() {
     switch (this.value) {
-      case "net-skeptical": netOutput = iol.skepticalNetOutput; break;
-      case "net-credulous": netOutput = iol.credolousNetOutput; break;
+      case "net-skeptical": iolw.netOutput = iol.skepticalNetOutput; break;
+      case "net-credulous": iolw.netOutput = iol.credolousNetOutput; break;
       default:
         alert("This should not happen; tell Alex :-)")
         // should not happen
@@ -781,14 +783,14 @@ $(document).ready(function() {
   /** Select the preferred output setting */
   $('#checkbox-preferred-output').change(function() {
     if (this.checked) {
-      preferred = true;
+      iolw.preferred = true;
       $('#radio-preference-lifting-brass').prop("disabled", false);
       $('#radio-preference-lifting-fafa').prop("disabled", false);
-      if (lifting == null) {
+      if (iolw.lifting == null) {
         $('#radio-preference-lifting-brass').click()
       }
     } else {
-      preferred = false;
+      iolw.preferred = false;
       $('#radio-preference-lifting-brass').prop("disabled", true);
       $('#radio-preference-lifting-fafa').prop("disabled", true);
     }
@@ -797,8 +799,8 @@ $(document).ready(function() {
   /** Select the preferred output preference lifting setting */
   $('input[type=radio][name=io-preference-lifting]').change(function() {
     switch (this.value) {
-      case "lifting-brass": lifting = iol.brasslifting; break;
-      case "lifting-fafa": lifting = iol.fafalifting; break;
+      case "lifting-brass": iolw.lifting = iol.brasslifting; break;
+      case "lifting-fafa": iolw.lifting = iol.fafalifting; break;
       default: 
         alert("This should not happen; tell Alex :-)")
         // should not happen
@@ -855,23 +857,23 @@ $(document).ready(function() {
       }
     }
   
-    if (constraints) {
-      const maxFamily = iol.maxFamily(outsetfunction,Nval,Aval,Cval,throughput)
+    if (iolw.constraints) {
+      const maxFamily = iol.maxFamily(iolw.outfunction,Nval,Aval,Cval,iolw.throughput)
       console.log("maxFamily: ", _.map(maxFamily, mf => _.map(mf, iol.printnorm)), maxFamily)
       let outFamily = null
-      if (preferred) {
-        const prefFamily = iol.prefFamily(maxFamily, Nval, lifting) 
+      if (iolw.preferred) {
+        const prefFamily = iol.prefFamily(maxFamily, Nval, iolw.lifting) 
         console.log("prefFamily: ", _.map(prefFamily, pf => _.map(pf, iol.printnorm)), prefFamily)
-        outFamily = iol.outFamily0(outsetfunction,prefFamily,Aval,throughput)
+        outFamily = iol.outFamily0(iolw.outfunction,prefFamily,Aval,iolw.throughput)
       } else {
-        outFamily = iol.outFamily0(outsetfunction,maxFamily,Aval,throughput)
+        outFamily = iol.outFamily0(iolw.outfunction,maxFamily,Aval,iolw.throughput)
       }
       console.log("outFamily: ", _.map(outFamily, pltk.plprintset), outFamily)
-      let result = netOutput(outFamily)
+      let result = iolw.netOutput(outFamily)
       console.log("netOutput: ", pltk.plprintset(result), result)
       return result
     } else {
-      let result = outsetfunction(Aval,Nval, throughput)
+      let result = iolw.outfunction(Aval,Nval, iolw.throughput)
       console.log("output: ", pltk.plprintset(result), result)
       return result
     }
