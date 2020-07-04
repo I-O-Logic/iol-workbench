@@ -244,6 +244,15 @@ iol = new function() { const lib = this;
       const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
       const triggeredEach = _.map(dnf, clause => heads(getBasicTriggeredNorms([clause],cnfN)))
       const result = _.reduce(triggeredEach, lib.semanticalIntersection)
+      console.log(result, pltk.plprintset(result))
+      // do new stuff
+      const triggered2 = getBasicTriggeredNorms2(A, N)
+      console.log(triggered2)
+      const result2 = heads(triggered2)
+      console.log(result2, pltk.plprintset(result2))
+      const i = _.differenceBy(result, result2, _.isEqual)
+      console.log("difference", i)
+      if (!_.isEmpty(i)) throw new Error("asd")
       return semanticalInterreduce(result)
     } else {
       // with throughput
@@ -464,6 +473,19 @@ iol = new function() { const lib = this;
     return directlyTriggered.concat(basicTriggered)
   }
   
+  const getBasicTriggeredNorms2 = function(A, N) {
+    return _.filter(N, function(n) {
+      //console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
+      const compat = lib.getCompatibleNorms(N,n)
+      ///console.log("compat of this: ", _.map(compat, lib.printnorm))
+      const compatBodies = bodies(compat)
+      //console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
+      const together = pltk.mkDisjs(compatBodies)
+      //console.log("together: ", pltk.plprint(together))
+      return pltk.consequence(A, together)
+    })
+  }
+  
   lib.partition = function(N) {
     const N2 = _.reduce(N, function(result, norm) {
       const h = head(norm);
@@ -545,12 +567,15 @@ const positiveAnswer = "Yes, the formula x is in the output set."
 N = null
 
 $(document).ready(function() {
+
+  ///////////////////////////////////////////////////
   // Examples
+  ///////////////////////////////////////////////////
+  
   $("#example1button").click(function(){
     $("input[type=text]").removeClass("is-invalid")
     $("#input").val('a,b')
     $("#norms").val('(a,x)\n(b,y)')
-    //$("#norms").val('(a,x)\n(b,(x | y) & (x | ~y))')
     $("#constraints").val('')
     $("#output").val('x & y')
     $('#radio-out1').click()
@@ -673,7 +698,10 @@ $(document).ready(function() {
     }
   });
 
+  ///////////////////////////////////////////////////
   // Parse error handling
+  ///////////////////////////////////////////////////
+  
   $("#input").on('input', function(e) {
     $("#input").removeClass("is-invalid")
   });
@@ -687,6 +715,24 @@ $(document).ready(function() {
     $("#output").removeClass("is-invalid")
   });
   
+  ///////////////////////////////////////////////////
+  // GUI state stuff
+  ///////////////////////////////////////////////////
+
+  /** Select the right out function */
+  $('input[type=radio][name=out]').change(function() {
+    switch (this.value) {
+      case "out1": outfunction = iol.out1;outsetfunction = iol.out1set; break;
+      case "out2": outfunction = iol.out2;outsetfunction = iol.out2set; break;
+      case "out3": outfunction = iol.out3;outsetfunction = iol.out3set; break;
+      case "out4": outfunction = iol.out4;outsetfunction = iol.out4set; break;
+      default: 
+        alert("This should not happen; tell Alex :-)")
+        // should not happen
+    }
+  });
+  
+  /** Select the throughput setting */
   $('#checkbox-io-throughput').change(function() {
     if (this.checked) {
       throughput = true
@@ -694,7 +740,8 @@ $(document).ready(function() {
       throughput = false
     }
   })
-  // GUI state
+
+  /** Select the contrained setting */
   $('#checkbox-constrained').change(function() {
     if (this.checked) {
       constraints = true
@@ -721,6 +768,8 @@ $(document).ready(function() {
       $('#copy-constraints').prop("disabled", true);
     }
   });
+  
+  /** Select the net output setting */
   $('input[type=radio][name=io-constrained-net]').change(function() {
     switch (this.value) {
       case "net-skeptical": netOutput = iol.skepticalNetOutput; break;
@@ -730,17 +779,8 @@ $(document).ready(function() {
         // should not happen
     }
   });
-  $('input[type=radio][name=out]').change(function() {
-    switch (this.value) {
-      case "out1": outfunction = iol.out1;outsetfunction = iol.out1set; break;
-      case "out2": outfunction = iol.out2;outsetfunction = iol.out2set; break;
-      case "out3": outfunction = iol.out3;outsetfunction = iol.out3set; break;
-      case "out4": outfunction = iol.out4;outsetfunction = iol.out4set; break;
-      default: 
-        alert("This should not happen; tell Alex :-)")
-        // should not happen
-    }
-  });
+  
+  /** Select the preferred output setting */
   $('#checkbox-preferred-output').change(function() {
     if (this.checked) {
       preferred = true;
@@ -755,6 +795,8 @@ $(document).ready(function() {
       $('#radio-preference-lifting-fafa').prop("disabled", true);
     }
   });
+  
+  /** Select the preferred output preference lifting setting */
   $('input[type=radio][name=io-preference-lifting]').change(function() {
     switch (this.value) {
       case "lifting-brass": lifting = iol.brasslifting; break;
@@ -764,16 +806,24 @@ $(document).ready(function() {
         // should not happen
     }
   });
+  
+  /** Utility: Copy input as constraint in GUI */
   $("#copy-constraints").click(function(){
     $('#constraints').val($('#input').val())
   });
   
+  ///////////////////////////////////////////////////
+  // I/O button functionalities
+  ///////////////////////////////////////////////////
   
+  /**
+    Returns the output set wrt. the given parameter settings.
+    Result is a list of formulas.
+  */
   const calculateOutput = function() {
     const Atext = $("#input").val()
     const Ntext = $("#norms").val()
     const Ctext = $('#constraints').val()
-    const xtext = $("#output").val()
     
     let Aval = []
     let Nval = []
@@ -829,7 +879,6 @@ $(document).ready(function() {
     }
   }
   
-  // iol functionality
   $("#outputButton").click(function(){
     $("#output").removeClass("is-invalid")
     const output = calculateOutput()
@@ -869,7 +918,5 @@ $(document).ready(function() {
       window.setTimeout(function() {$('#response').css('visibility', 'collapse');}, 5000);
     }
   });
-  
-  
 });
 
