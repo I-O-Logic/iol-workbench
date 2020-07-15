@@ -37,13 +37,6 @@ iol = new function() { const lib = this;
   lib.out2set = function(A, N, throughput) {
     if (_.isUndefined(throughput) || throughput === false) {
       // without throughput
-      /* old implementation, TODO: Remove */
-      //const cnfN = _.map(N, function(n) { return [pltk.conjs(pltk.cnf(body(n))), head(n)] })
-      //const dnf = pltk.disjs(pltk.dnf(pltk.mkConjs(A)))
-      //const triggeredEach = _.map(dnf, clause => heads(getBasicTriggeredNorms([clause],cnfN)))
-      //const result = _.reduce(triggeredEach, lib.semanticalIntersection)
-      //console.log(result, pltk.plprintset(result))
-      /* old implementation END */
       const triggered = getBasicTriggeredNorms(A, N)
       const result = heads(triggered)
       return semanticalInterreduce(result)
@@ -104,23 +97,15 @@ iol = new function() { const lib = this;
     let result = []
        
     while (!(_.isEmpty(NN))) {
-      //console.log("####")
       const n0 = _.size(_.sample(NN))
-      //console.log("n0", n0)
-      //console.log("NN[0]", NN[0])
       NNC = _.filter(NN, function(x) {
-        //console.log("x", x)
         return pltk.consistent(out(A,x, throughput).concat(C))
       })
-      //console.log("NNC", NNC)
       result = _.concat(result, NNC)
       NNNotC = _.without(NN,NNC)
-      //console.log("NNNotC", NNNotC)
       
       NN = _.uniqWith(_.flatMap(NNNotC,subsetsOneSmaller), _.isEqual)
-      //console.log("subsets of NN", NN)
       NN = _.filter(NN, function(n) {return !_.some(result, r => subset(n,r))})
-      //console.log("NN", NN)
     }
     return result
   }
@@ -140,7 +125,8 @@ iol = new function() { const lib = this;
   lib.skepticalNetOutput = function(outFamily) {
     const N0 = _.map(outFamily, N => pltk.mkConjs(N))
     return semanticalInterreduce([pltk.mkDisjs(N0)])
-    //return semanticalInterreduce(_.reduce(NN, lib.semanticalIntersection))
+    //return semanticalInterreduce(_.reduce(NN, lib.semanticalIntersection)) 
+    // TODO: Disjunction vs. union, look it up
   }
   
   lib.prefFamily = function(maxFamily, N, lifting) {
@@ -226,63 +212,19 @@ iol = new function() { const lib = this;
     return result
   }
   
-  /*const canonizeOut = function(M) {
-    let Msimp = pltk.simpset(M)
-    // console.log(pltk.plprintset(Msimp))
-    let together = pltk.mkConjs(Msimp)
-    // console.log(pltk.plprint(together))
-    let cnf = pltk.cnf(together)
-    // console.log(cnf,pltk.plprint(cnf))
-    let cnfSimp = pltk.cnfsimp(cnf)
-    // console.log(cnfSimp, pltk.plprint(cnfSimp))
-    let result = pltk.conjs(cnfSimp)
-    return result
-  }*/
-  
-  /** Assumes the bodies of N are CNF-normal sets of clauses, TODO: Remove */
-  /*const getBasicTriggeredNormsOLD = function(A, N) {
-    const updatedN = _.map(N, function(n) {
-      return [_.reject(body(n), x => pltk.consequence(A, x)),head(n)]
-    });
-    const directlyTriggered = _.filter(updatedN, n => _.isEmpty(body(n)))
-    const others = _.without(updatedN, ...directlyTriggered)
-    // for each norm:
-    // get compatible norms (compatible head) [including itself?]
-    // and check if the set of compatible norms has the success condition
-    // filter all with that success condition
-    const basicTriggered = _.filter(others, function(n) {
-      //console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
-      const compat = lib.getCompatibleNorms(others,n)
-      ///console.log("compat of this: ", _.map(compat, lib.printnorm))
-      const compatBodies = _.map(compat, m => pltk.mkConjs(body(m)))
-      //console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
-      const together = pltk.mkDisjs(compatBodies)
-      //console.log("together: ", pltk.plprint(together))
-      return pltk.tautology(together)
-    })
-    return directlyTriggered.concat(basicTriggered)
-  }*/
-  
   const getBasicTriggeredNorms = function(A, N) {
     return _.filter(N, function(n) {
-      //console.log("check (",pltk.plprintset(body(n)),pltk.plprint(head(n)),")")
       const compat = lib.getCompatibleNorms(N,n)
-      ///console.log("compat of this: ", _.map(compat, lib.printnorm))
       const compatBodies = bodies(compat)
-      //console.log("compatbodies: ", _.map(compatBodies, pltk.plprint))
       const together = pltk.mkDisjs(compatBodies)
-      //console.log("together: ", pltk.plprint(together))
       return pltk.consequence(A, together)
     })
   }
   
   /* retrieve norms that have a head that is at least as strong as n */
   lib.getCompatibleNorms = function(N, n) {
-    //console.log("getCompatibleNorms N: ", _.map(N, lib.printnorm))
-    //console.log("getCompatibleNorms n: ", lib.printnorm(n))
     const h = head(n)
     const result = _.filter(N, m => pltk.consequence([head(m)],h))
-    //console.log("getCompatibleNorms(N,n): ", _.map(result, lib.printnorm))
     return result
   }
   
