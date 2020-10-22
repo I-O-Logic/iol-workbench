@@ -293,11 +293,8 @@ $(document).ready(function() {
     $("#constraints").val('')
     $("#output").val('x & y')
     $('#radio-out1').click()
-    if ($('#checkbox-constrained').prop("checked", true)) {
+    if ($('#checkbox-constrained').prop("checked")) {
       $('#checkbox-constrained').click()
-    }
-    if ($('#checkbox-preferred-output').prop("checked", true)) {
-      $('#checkbox-preferred-output').click()
     }
   });
   $("#example2button").click(function(){
@@ -307,11 +304,8 @@ $(document).ready(function() {
     $("#constraints").val('')
     $("#output").val('x')
     $('#radio-out2').click()
-    if ($('#checkbox-constrained').prop("checked", true)) {
+    if ($('#checkbox-constrained').prop("checked")) {
       $('#checkbox-constrained').click()
-    }
-    if ($('#checkbox-preferred-output').prop("checked", true)) {
-      $('#checkbox-preferred-output').click()
     }
   });
   $("#example3button").click(function(){
@@ -321,11 +315,8 @@ $(document).ready(function() {
     $("#constraints").val('')
     $("#output").val('z')
     $('#radio-out3').click()
-    if ($('#checkbox-constrained').prop("checked", true)) {
+    if ($('#checkbox-constrained').prop("checked")) {
       $('#checkbox-constrained').click()
-    }
-    if ($('#checkbox-preferred-output').prop("checked", true)) {
-      $('#checkbox-preferred-output').click()
     }
   });
   $("#example4button").click(function(){
@@ -335,10 +326,10 @@ $(document).ready(function() {
     $("#constraints").val('~helping')
     $("#output").val('')
     $('#radio-out3').click()
-    if ($('#checkbox-constrained').prop("checked", false)) {
+    if (!$('#checkbox-constrained').prop("checked")) {
       $('#checkbox-constrained').click()
     }
-    if ($('#checkbox-preferred-output').prop("checked", true)) {
+    if ($('#checkbox-preferred-output').prop("checked")) {
       $('#checkbox-preferred-output').click()
     }
   });
@@ -349,10 +340,10 @@ $(document).ready(function() {
     $("#constraints").val('killing')
     $("#output").val('')
     $('#radio-out1').click()
-    if ($('#checkbox-constrained').prop("checked", false)) {
+    if (!$('#checkbox-constrained').prop("checked")) {
       $('#checkbox-constrained').click()
     }
-    if ($('#checkbox-preferred-output').prop("checked", true)) {
+    if ($('#checkbox-preferred-output').prop("checked")) {
       $('#checkbox-preferred-output').click()
     }
   });
@@ -363,10 +354,10 @@ $(document).ready(function() {
     $("#constraints").val('')
     $("#output").val('')
     $('#radio-out1').click()
-    if ($('#checkbox-constrained').prop("checked", false)) {
+    if (!$('#checkbox-constrained').prop("checked")) {
       $('#checkbox-constrained').click()
     }
-    if ($('#checkbox-preferred-output').prop("checked", true)) {
+    if ($('#checkbox-preferred-output').prop("checked")) {
       $('#checkbox-preferred-output').click()
     }
   });
@@ -376,10 +367,10 @@ $(document).ready(function() {
     $("#norms").val('(T,cityA)\n(T,cityB)\n(T,cityC)')
     $("#constraints").val('(~cityA|(~cityB|~cityC)),(~cityA|~cityB)')
     $("#output").val('')
-    if ($('#checkbox-constrained').prop("checked", false)) {
+    if (!$('#checkbox-constrained').prop("checked")) {
       $('#checkbox-constrained').click()
     }
-    if ($('#checkbox-preferred-output').prop("checked", false)) {
+    if (!$('#checkbox-preferred-output').prop("checked")) {
       $('#checkbox-preferred-output').click()
     }
   });
@@ -390,10 +381,10 @@ $(document).ready(function() {
     $("#constraints").val('dataset')
     $("#output").val('')
     $('#radio-out3').click()
-    if ($('#checkbox-constrained').prop("checked", false)) {
+    if (!$('#checkbox-constrained').prop("checked")) {
       $('#checkbox-constrained').click()
     }
-    if ($('#checkbox-preferred-output').prop("checked", false)) {
+    if (!$('#checkbox-preferred-output').prop("checked")) {
       $('#checkbox-preferred-output').click()
     }
   });
@@ -404,10 +395,10 @@ $(document).ready(function() {
     $("#constraints").val('')
     $("#output").val('')
     $('#radio-out3').click()
-    if ($('#checkbox-constrained').prop("checked", false)) {
+    if (!$('#checkbox-constrained').prop("checked")) {
       $('#checkbox-constrained').click()
     }
-    if ($('#checkbox-preferred-output').prop("checked", false)) {
+    if (!$('#checkbox-preferred-output').prop("checked")) {
       $('#checkbox-preferred-output').click()
     }
   });
