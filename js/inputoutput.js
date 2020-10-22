@@ -244,18 +244,36 @@ iol = new function() { const lib = this;
     return result
   }
   
-  /* TODO: unit propagation etc. for simplication */
+  /* tries to reduce the complexity of the set of formulas, by:
+     - applying intra-formula simplification
+     - unit propagation
+     - subsumption 
+  */
   const semanticalInterreduce = function(A) {
+    /* simplification: */
     const Asimp = pltk.simpset(A)
     const Asimpcnf = pltk.conjs(pltk.cnfsimp(pltk.cnf(pltk.mkConjs(Asimp)))) 
+    /* do unit propagation */
+    let units = _.filter(Asimpcnf, pltk.isUnitFormula)
+    let nonUnits = _.without(Asimpcnf, ...units)
+    let newUnits = units
+    while (!_.isEmpty(newUnits)) {
+      let replacements = _.map(units, u => [pltk.getUnitFormulaBody(u), pltk.getUnitFormulaPolarity(u)])
+      let rewrittenNonUnits = _.map(nonUnits, f => pltk.simp(pltk.deepReplaceBys1(f, replacements)))
+      newUnits = _.filter(rewrittenNonUnits, pltk.isUnitFormula)
+      units = units.concat(newUnits)
+      nonUnits = _.without(rewrittenNonUnits, ...newUnits)
+    }
+    const formulas = units.concat(nonUnits)
+    /* do subsumption*/
     let result = []
-    _.forEach(Asimpcnf, function(a) {
-      if (!pltk.consequence(result,a)) {
-        result = _.reject(result, r => pltk.consequence([a],r))
+    _.forEach(formulas, function(a) {
+      if (!pltk.consequence(result,a)) { /* <- forward subsumption */
+        result = _.reject(result, r => pltk.consequence([a],r)) /* backward subsumption */
         result.push(a)
       }
     })
-    //console.log("Result: ", pltk.plprintset(result))
+    /* done */
     return result
   }
   

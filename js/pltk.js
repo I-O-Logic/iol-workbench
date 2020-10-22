@@ -346,6 +346,26 @@ pltk = new function() { const lib = this;
     } else return it
   }
   
+  lib.deepReplaceBy = function(it, what, by) {
+    if (_.isEqual(it, what)) {
+      return by
+    } else {
+      if (lib.isAtom(it)) {
+        return it
+      } else return { op: it.op, args: _.map(it.args, arg => lib.deepReplaceBy(arg, what, by)) }
+    }
+  }
+  
+  /* deep replacement successively (it's NOT simultaneously)*/
+  lib.deepReplaceBys = function(it, whats, bys) {
+    const replacements = _.zip(whats, bys)
+    return _.reduce(replacements, function (acc, replacement) { return lib.deepReplaceBy(acc, replacement[0], replacement[1]) }, it)
+  }
+  
+  /* deep replacement successively (it's NOT simultaneously)*/
+  lib.deepReplaceBys1 = function(it, replacements) {
+    return _.reduce(replacements, function (acc, replacement) { return lib.deepReplaceBy(acc, replacement[0], replacement[1]) }, it)
+  }
   
   /* true if a subsumes b */
   lib.disjClauseSubsumes = function(a,b) {
@@ -364,6 +384,24 @@ pltk = new function() { const lib = this;
       return lib.isVariable(body)
     } 
     return lib.isVariable(f)
+  }
+  
+  /* pre: isUnitFormula */
+  lib.getUnitFormulaPolarity = function(f) {    
+    if (lib.isNeg(f)) {
+      return { op: 'LF', args: []}
+    } else {
+      return { op: 'LF', args: []}
+    }
+  }
+  
+  /* pre: isUnitFormula */
+  lib.getUnitFormulaBody = function(f) {    
+    if (lib.isNeg(f)) {
+      return f.args[0]
+    } else {
+      return f
+    }
   }
  
   lib.isVariable = function(f) {
@@ -395,6 +433,10 @@ pltk = new function() { const lib = this;
   }
   lib.isF = function(f) {
     return _.has(f,'op') && f.op == 'LF'
+  }
+  
+  lib.isAtom = function(f) {
+    return lib.isVariable(f) || lib.isT(f) || lib.isF(f)
   }
   
   // ###############################
