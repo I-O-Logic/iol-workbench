@@ -61,9 +61,9 @@ information for A, N and x and press "check given output".
 - [X] Calculation of finite basis of output set (since 0.5)
 - [X] Norm preferences (since 0.6)
 
-Current version: 0.6
+Current version: 0.7
 
-Last update: 
+Last update: Improved formula simplification (using unit propagation/rewriting).
 
 ## License
 
@@ -73,5 +73,7 @@ and uses third party libraries that are distributed under their own terms (see L
 ## References
 
 [1] Makinson, D., van der Torre, L.W.N.: Input/Output Logics. J. Philosophical Logic 29(4), 383–408 (2000). https://doi.org/10.1023/A:1004748624537
+
 [2] Makinson, D., van der Torre, L.W.N.: Constraints for Input/Output Logics. J. Philos. Log. 30(2): 155-185 (2001). https://doi.org/10.1023/A:1017599526096
 
+[3] Alexander Steen, Goal-Directed Decision Procedures for Input/Output Logics. In 15th International Conference on Deontic Logic and Normative Systems (DEON 2020/2021, Munich), Fenrong Liu, Alessandra Marra, Paul Portner, and Frederik Van De Putte (Eds.), College Publications, London, 2021. (to appear). See: http://www.collegepublications.co.uk/DEON/?00003
