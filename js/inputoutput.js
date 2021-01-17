@@ -47,6 +47,24 @@ iol = new function() { const lib = this;
     }
   }
   
+  lib.out2setNew = function(A, N, throughput) {
+    if (_.isUndefined(throughput) || throughput === false) {
+      // without throughput
+      const clauses = _.map(pltk.disjs(pltk.dnf(pltk.mkConjs(A))), c => pltk.conjs(c))
+      const partialresults = _.map(clauses, function (c) { 
+        const triggered  = getBasicTriggeredNorms(c, N)
+        const result = heads(triggered)
+        return pltk.mkConjs(semanticalInterreduce(result))
+      })
+      const together = pltk.mkDisjs(partialresults)
+      return semanticalInterreduce([together])
+    } else {
+      // with throughput
+      const m = materialization(N)
+      return semanticalInterreduce(m.concat(A))
+    }
+  }
+  
   lib.out3set = function(A, N, throughput) {
     let A2 = A.slice() // the incremental set of facts
     let N2 = getDirectlyTriggeredNorms(A2,N) // the set of triggered norms
@@ -446,7 +464,7 @@ $(document).ready(function() {
   $('input[type=radio][name=out]').change(function() {
     switch (this.value) {
       case "out1": iolw.outfunction = iol.out1set; break;
-      case "out2": iolw.outfunction = iol.out2set; break;
+      case "out2": iolw.outfunction = iol.out2setNew; break;
       case "out3": iolw.outfunction = iol.out3set; break;
       case "out4": iolw.outfunction = iol.out4set; break;
       default: 
