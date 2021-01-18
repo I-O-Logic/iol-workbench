@@ -60,8 +60,9 @@ information for A, N and x and press "check given output".
 - [X] Constrained I/O logic (since 0.4)
 - [X] Calculation of finite basis of output set (since 0.5)
 - [X] Norm preferences (since 0.6)
+- Update 0.8: Fixed basic output bug where rule WO was not applied correctly
 
-Current version: 0.7
+Current version: 0.8
 
 Last update: Improved formula simplification (using unit propagation/rewriting).
 
