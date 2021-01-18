@@ -87,21 +87,21 @@ iol = new function() { const lib = this;
     if (_.isUndefined(throughput) || throughput === false) {
       // without throughput
       let lastOut = [{ op: 'LT', args: [] }]
-      let basicOut = lib.out2set(A,N)
+      let basicOut = lib.out2setNew(A,N)
       let triggered = basicOut.concat(lib.out3set(A.concat(basicOut), N))
       
       // Loop: Terminate if the previous output implies the new one (then, nothing new has been detached)
       // The inverse (i.e., the new output implies the old one) holds unconditionally
       while (!pltk.consequence(lastOut, pltk.mkConjs(triggered))) {
         lastOut = triggered
-        basicOut = triggered.concat(lib.out2set(lastOut,N))
+        basicOut = triggered.concat(lib.out2setNew(lastOut,N))
         triggered = basicOut.concat(lib.out3set(A.concat(basicOut), N))
       }
       
       return semanticalInterreduce(lastOut)
     } else {
       // with throughput
-      return lib.out2set(A, N, throughput)
+      return lib.out2setNew(A, N, throughput)
     }
   }
   
