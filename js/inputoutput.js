@@ -37,19 +37,6 @@ iol = new function() { const lib = this;
   lib.out2set = function(A, N, throughput) {
     if (_.isUndefined(throughput) || throughput === false) {
       // without throughput
-      const triggered = getBasicTriggeredNorms(A, N)
-      const result = heads(triggered)
-      return semanticalInterreduce(result)
-    } else {
-      // with throughput
-      const m = materialization(N)
-      return semanticalInterreduce(m.concat(A))
-    }
-  }
-  
-  lib.out2setNew = function(A, N, throughput) {
-    if (_.isUndefined(throughput) || throughput === false) {
-      // without throughput
       const clauses = _.map(pltk.disjs(pltk.dnf(pltk.mkConjs(A))), c => pltk.conjs(c))
       const partialresults = _.map(clauses, function (c) { 
         const triggered  = getBasicTriggeredNorms(c, N)
@@ -64,6 +51,7 @@ iol = new function() { const lib = this;
       return semanticalInterreduce(m.concat(A))
     }
   }
+  
   
   lib.out3set = function(A, N, throughput) {
     let A2 = A.slice() // the incremental set of facts
@@ -82,26 +70,15 @@ iol = new function() { const lib = this;
       return semanticalInterreduce(heads(N2).concat(A))
     }
   }
-  
+    
   lib.out4set = function(A, N, throughput) {
     if (_.isUndefined(throughput) || throughput === false) {
-      // without throughput
-      let lastOut = [{ op: 'LT', args: [] }]
-      let basicOut = lib.out2setNew(A,N)
-      let triggered = basicOut.concat(lib.out3set(A.concat(basicOut), N))
-      
-      // Loop: Terminate if the previous output implies the new one (then, nothing new has been detached)
-      // The inverse (i.e., the new output implies the old one) holds unconditionally
-      while (!pltk.consequence(lastOut, pltk.mkConjs(triggered))) {
-        lastOut = triggered
-        basicOut = triggered.concat(lib.out2setNew(lastOut,N))
-        triggered = basicOut.concat(lib.out3set(A.concat(basicOut), N))
-      }
-      
-      return semanticalInterreduce(lastOut)
+      // Corollary to Obs. 7: out4(N,A) = out2(N, A U m(N))
+      const m = materialization(N)
+      return lib.out2set(m.concat(A), N, throughput)
     } else {
       // with throughput
-      return lib.out2setNew(A, N, throughput)
+      return lib.out2set(A, N, throughput)
     }
   }
   
@@ -464,7 +441,7 @@ $(document).ready(function() {
   $('input[type=radio][name=out]').change(function() {
     switch (this.value) {
       case "out1": iolw.outfunction = iol.out1set; break;
-      case "out2": iolw.outfunction = iol.out2setNew; break;
+      case "out2": iolw.outfunction = iol.out2set; break;
       case "out3": iolw.outfunction = iol.out3set; break;
       case "out4": iolw.outfunction = iol.out4set; break;
       default: 
