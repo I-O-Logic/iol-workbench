@@ -391,7 +391,7 @@ pltk = new function() { const lib = this;
     if (lib.isNeg(f)) {
       return { op: 'LF', args: []}
     } else {
-      return { op: 'LF', args: []}
+      return { op: 'LT', args: []}
     }
   }
   
